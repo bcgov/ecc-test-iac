@@ -9,9 +9,10 @@ jobs:
     steps:
       - name: check out repository
         uses: actions/checkout@v4
+      - name: download dependencies
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: "20.x"
       - run: cd tools/config && npm ci
       - name: run script
         uses: actions/github-script@v7
