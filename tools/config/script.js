@@ -13,15 +13,16 @@ module.exports = ({ github, context, process }) => {
   console.log("TESTING JSON PARSING");
   try {
     console.log("========================== stringify");
-    console.log(JSON.parse(JSON.stringify(process.env.SECRET_JSON)));
-    const myJson = JSON.parse(JSON.stringify(process.env.SECRET_JSON));
+    const myJson = JSON.parse(process.env.SECRET_JSON);
+    console.log(myJson);
+
     console.log(myJson.test);
     console.log(JSON.parse(JSON.stringify(process.env.INVALID_SECRET_JSON)));
 
-    console.log("========================== parse");
-    console.log(JSON.parse(process.env.SECRET_JSON));
+    console.log("========================== error");
     console.log(JSON.parse(process.env.INVALID_SECRET_JSON));
   } catch (e) {
+    console.log("error parsing JSON");
     console.log(e);
   }
 };
