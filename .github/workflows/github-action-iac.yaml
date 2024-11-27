@@ -14,6 +14,8 @@ jobs:
         env:
           REALM_ID: "REALM_ID_HERE"
           KEYCLOAK_URL: "my keycloak url"
+          SECRET_VALUE: ${{ secrets.SECRET_VALUE }}
+          PUBLIC_VALUE: ${{ vars.PUBLIC_VALUE }}
         with:
           script: |
             const script = require('./tools/config/script.js');
