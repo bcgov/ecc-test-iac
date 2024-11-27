@@ -10,6 +10,15 @@ module.exports = ({ github, context, process }) => {
   console.log(process.env.SECRET_VALUE);
   console.log(process.env.PUBLIC_VALUE);
 
-  console.log("=======================");
-  console.log(process.env);
+  console.log("TESTING JSON PARSING");
+  try {
+    console.log("========================== stringify");
+    console.log(JSON.stringify(process.env.SECRET_JSON));
+    console.log(JSON.stringify(process.env.INVALID_SECRET_JSON));
+    console.log("========================== parse");
+    console.log(JSON.parse(process.env.SECRET_JSON));
+    console.log(JSON.parse(process.env.INVALID_SECRET_JSON));
+  } catch (e) {
+    console.log(e);
+  }
 };
