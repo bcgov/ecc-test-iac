@@ -1,7 +1,8 @@
+const axios = require("axios");
+
 // @ts-check
 /** @param {import('github-script').AsyncFunctionArguments} AsyncFunctionArguments */
-
-module.exports = ({ github, context, core, process }) => {
+module.exports = async ({ github, context, core, process }) => {
   console.log(`SHA: ${context.sha}`);
   console.log(`REF: ${context.ref}`);
   console.log("environment variables");
@@ -10,13 +11,14 @@ module.exports = ({ github, context, core, process }) => {
   console.log(process.env.SECRET_VALUE);
   console.log(process.env.PUBLIC_VALUE);
 
+  const res = await axios.get("https://www.google.com");
+  console.log(res);
+
   console.log("TESTING JSON PARSING");
   try {
     //ensure the json value is valid before proceeding
     JSON.parse(process.env.SECRET_JSON);
-    JSON.parse(process.env.INVALID_SECRET);
   } catch (e) {
-    console.log("error parsing JSON");
-    console.log(core.setFailed("failed parsing JSON"));
+    core.setFailed("failed parsing JSON");
   }
 };
