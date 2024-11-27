@@ -6,10 +6,13 @@ jobs:
   keycloak-infrastructure-as-code:
     runs-on: ubuntu-latest
     environment: dev
-    - run: npm install axios@1.7.2
     steps:
       - name: check out repository
         uses: actions/checkout@v4
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+      - run: cd tools/config && npm ci
       - name: run script
         uses: actions/github-script@v7
         env:
