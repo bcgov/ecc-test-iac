@@ -1,7 +1,10 @@
-module.exports = ({ github, context }) => {
-  console.log("==========GITHUB==========");
-  console.log(github);
-  console.log("============CONTEXT==========");
-  console.log(context);
-  return context.payload.client_payload.value;
+// @ts-check
+/** @param {import('github-script').AsyncFunctionArguments} AsyncFunctionArguments */
+module.exports = ({ github, context, process }) => {
+  console.log(`SHA: ${context.sha}`);
+  console.log(`REF: ${context.ref}`);
+  console.log("environment variables");
+  console.log(process);
+  console.log("=======================");
+  console.log(process.env);
 };
