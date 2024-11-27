@@ -1,7 +1,7 @@
 // @ts-check
 /** @param {import('github-script').AsyncFunctionArguments} AsyncFunctionArguments */
 
-module.exports = ({ github, context, process, core }) => {
+module.exports = ({ github, context, core, process }) => {
   console.log(`SHA: ${context.sha}`);
   console.log(`REF: ${context.ref}`);
   console.log("environment variables");
@@ -17,6 +17,6 @@ module.exports = ({ github, context, process, core }) => {
     JSON.parse(process.env.INVALID_SECRET);
   } catch (e) {
     console.log("error parsing JSON");
-    core.setFailed("script.js failed");
+    console.log(core.setFailed("failed parsing JSON"));
   }
 };
