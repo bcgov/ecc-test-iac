@@ -17,8 +17,8 @@ jobs:
       - name: run script
         uses: actions/github-script@v7
         env:
-          REALM_ID: "REALM_ID_HERE"
-          KEYCLOAK_URL: "my keycloak url"
+          REALM_ID: "childcare-applications"
+          ENVIRONMENT: "dev"
           SECRET_VALUE: ${{ secrets.SECRET_VALUE }}
           PUBLIC_VALUE: ${{ vars.PUBLIC_VALUE }}
           SECRET_JSON: ${{ secrets.SECRET_JSON }}
