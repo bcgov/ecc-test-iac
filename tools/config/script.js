@@ -50,7 +50,9 @@ module.exports = async ({ _github, context, core, process }) => {
   if (userId) {
     //userId found
     await axios.delete(`${KEYCLOAK_ADMIN_URL}/clients/${userId}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
   }
 
@@ -60,7 +62,10 @@ module.exports = async ({ _github, context, core, process }) => {
     `${KEYCLOAK_ADMIN_URL}/clients`,
     process.env.SECRET_JSON.testing,
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
     }
   );
 };
