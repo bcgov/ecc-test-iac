@@ -11,9 +11,9 @@ module.exports = async ({ _github, context, core, process }) => {
   console.log(process.env.PUBLIC_VALUE);
 
   const KEYCLOAK_URL = `https://${process.env.ENVIRONMENT}.loginproxy.gov.bc.ca/auth/realms/${process.env.REALM_ID}`;
-  console.log(KEYCLOAK_URL);
-
-  const res = await axios.get(KEYCLOAK_URL);
+  console.log(`KEYCLOAK_URL :: ${KEYCLOAK_URL}`);
+  const KEYCLOAK_ADMIN_URL = `https://${process.env.ENVIRONMENT}.loginproxy.gov.bc.ca/auth/admin/realms/${process.env.REALM_ID}`;
+  console.log(`KEYCLOAK_ADMIN_URL :: ${KEYCLOAK_ADMIN_URL}`);
 
   console.log("obtaining token");
   const token = (
@@ -32,7 +32,6 @@ module.exports = async ({ _github, context, core, process }) => {
     )
   ).data.access_token;
 
-  console.log("TESTING JSON PARSING");
   try {
     //ensure the json value is valid before proceeding
     JSON.parse(process.env.SECRET_JSON);
@@ -40,7 +39,7 @@ module.exports = async ({ _github, context, core, process }) => {
     core.setFailed("failed parsing JSON");
   }
 
-  const users = await axios.get(`${KEYCLOAK_URL}/clients`, {
+  const users = await axios.get(`${KEYCLOAK_ADMIN_URL}/clients`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
