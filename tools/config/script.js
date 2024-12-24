@@ -39,13 +39,28 @@ module.exports = async ({ _github, context, core, process }) => {
     core.setFailed("failed parsing JSON");
   }
 
-  const users = await axios.get(`${KEYCLOAK_ADMIN_URL}/clients`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const users = (
+    await axios.get(`${KEYCLOAK_ADMIN_URL}/clients`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+  ).data;
 
-  const userId = users.filter(
-    (user) => user.clientId === "test-client-derek"
-  ).id;
+  let userId = users.find((user) => user.clientId === "test-client-derek1")?.id;
 
-  console.log(userId);
+  if (userId) {
+    //userId found
+    await axios.delete(`${KEYCLOAK_ADMIN_URL}/clients/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+
+  //create user
+  console.log("creating user");
+  await axios.post(
+    `${KEYCLOAK_ADMIN_URL}/clients`,
+    process.env.SECRET_JSON.testing,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
 };
