@@ -39,4 +39,14 @@ module.exports = async ({ _github, context, core, process }) => {
   } catch (e) {
     core.setFailed("failed parsing JSON");
   }
+
+  const users = await axios.get(`${KEYCLOAK_URL}/clients`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const userId = users.filter(
+    (user) => user.clientId === "test-client-derek"
+  ).id;
+
+  console.log(userId);
 };
