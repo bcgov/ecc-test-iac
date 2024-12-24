@@ -21,6 +21,8 @@ jobs:
           ENVIRONMENT: "dev"
           SECRET_VALUE: ${{ secrets.SECRET_VALUE }}
           PUBLIC_VALUE: ${{ vars.PUBLIC_VALUE }}
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           SECRET_JSON: ${{ secrets.SECRET_JSON }}
           INVALID_SECRET_JSON: ${{ secrets.INVALID_SECRET_JSON }}
         with:

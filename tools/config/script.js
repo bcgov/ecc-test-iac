@@ -14,7 +14,15 @@ module.exports = async ({ _github, context, core, process }) => {
   console.log(KEYCLOAK_URL);
 
   const res = await axios.get(KEYCLOAK_URL);
-  console.log(res);
+
+  console.log("obtaining token");
+  const token = (
+    await axios.post(`${KEYCLOAK_URL}/protocol/openid-connect/token`, null, {
+      grant_type: "client_credentials",
+      client_id: process.env.CLIENT_ID,
+      client_secret: process.env.CLIENT_SECRET,
+    })
+  ).data.access_token;
 
   console.log("TESTING JSON PARSING");
   try {
