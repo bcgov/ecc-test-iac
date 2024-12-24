@@ -17,14 +17,19 @@ module.exports = async ({ _github, context, core, process }) => {
 
   console.log("obtaining token");
   const token = (
-    await axios.post(`${KEYCLOAK_URL}/protocol/openid-connect/token`, null, {
-      grant_type: "client_credentials",
-      client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET,
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+    await axios.post(
+      `${KEYCLOAK_URL}/protocol/openid-connect/token`,
+      {
+        grant_type: "client_credentials",
+        client_id: process.env.CLIENT_ID,
+        client_secret: process.env.CLIENT_SECRET,
       },
-    })
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    )
   ).data.access_token;
 
   console.log("TESTING JSON PARSING");
