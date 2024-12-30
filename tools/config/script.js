@@ -2,13 +2,15 @@ const axios = require("axios");
 
 // @ts-check
 /** @param {import('github-script').AsyncFunctionArguments} AsyncFunctionArguments */
-module.exports = async ({ _github, context, core, process }) => {
+module.exports = async ({ _github, context, core, process, exec }) => {
   console.log(`SHA: ${context.sha}`);
   console.log(`REF: ${context.ref}`);
   console.log("environment variables");
   console.log(process.env.REALM_ID);
   console.log(process.env.SECRET_VALUE);
   console.log(process.env.PUBLIC_VALUE);
+
+  await exec("ls -l");
 
   try {
     //ensure the json value is valid before proceeding
@@ -82,7 +84,10 @@ module.exports = async ({ _github, context, core, process }) => {
   ).data.access_token;
 
   //TODO replace remove test to try with the actual client names
+  // Clients
   recreateClient("test-childcare-ecer-dev", token);
   recreateClient("test-childcare-ecer-api-dev", token);
   recreateClient("test-childcare-ecer-ew-dev", token);
+
+  // Identity providers
 };
