@@ -26,8 +26,6 @@ module.exports = async ({ _github, context, core, process }) => {
 
   //helper functions
   const getClient = async (clientId, token) => {
-    console.log("KEYCLOAK_URL IS");
-    console.log(KEYCLOAK_URL);
     console.log(`finding client ${clientId}`);
     const users = (
       await axios.get(`${KEYCLOAK_ADMIN_URL}/clients`, {
@@ -58,7 +56,7 @@ module.exports = async ({ _github, context, core, process }) => {
   const recreateClient = async (clientId, token) => {
     const id = await getClient(clientId, token);
     if (id) {
-      console.log(`${clientId} found deleting"`);
+      console.log(`deleting existing client ${clientId}`);
       await deleteClient(id, token);
     }
     console.log(`creating client ${clientId}`);
@@ -83,37 +81,8 @@ module.exports = async ({ _github, context, core, process }) => {
     )
   ).data.access_token;
 
+  //TODO replace remove test to try with the actual client names
   recreateClient("test-childcare-ecer-dev", token);
-
-  // getClient("test-childcare-ecer-dev", token);
-
-  // const users = (
-  //   await axios.get(`${KEYCLOAK_ADMIN_URL}/clients`, {
-  //     headers: { Authorization: `Bearer ${token}` },
-  //   })
-  // ).data;
-
-  // let userId = users.find((user) => user.clientId === "test-client-derek1")?.id;
-
-  // if (userId) {
-  //   //userId found
-  //   await axios.delete(`${KEYCLOAK_ADMIN_URL}/clients/${userId}`, {
-  //     headers: {
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //   });
-  // }
-
-  // //create user
-  // console.log("creating user");
-  // await axios.post(
-  //   `${KEYCLOAK_ADMIN_URL}/clients`,
-  //   process.env.SECRET_JSON.testing,
-  //   {
-  //     headers: {
-  //       Authorization: `Bearer ${token}`,
-  //       "Content-Type": "application/json",
-  //     },
-  //   }
-  // );
+  recreateClient("test-childcare-ecer-api-dev", token);
+  recreateClient("test-childcare-ecer-ew-dev", token);
 };
