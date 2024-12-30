@@ -44,7 +44,7 @@ module.exports = async ({ _github, context, core, process }) => {
       },
     });
   };
-  const recreateClient = async (clientId, token) => {
+  const recreateClient = async function (clientId, token) {
     const id = await getClient(clientId, token);
     if (id) {
       console.log(`${clientId} found deleting"`);
@@ -52,7 +52,7 @@ module.exports = async ({ _github, context, core, process }) => {
     }
     console.log(`creating client ${clientId}`);
     await createClientFromJson(
-      process.env.SECRET_JSON.clients[clientId],
+      this.process.env.SECRET_JSON.clients[clientId],
       token
     );
   };
