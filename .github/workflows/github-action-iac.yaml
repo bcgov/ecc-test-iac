@@ -8,6 +8,10 @@ jobs:
     steps:
       - name: check out repository
         uses: actions/checkout@v4
+      - name: Install oc
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: 4
       - name: download dependencies
         uses: actions/setup-node@v3
         with:
