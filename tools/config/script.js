@@ -25,6 +25,8 @@ module.exports = async ({ _github, context, core, process }) => {
 
   //helper functions
   const getClient = async (clientId, token) => {
+    console.log("KEYCLOAK_URL IS");
+    console.log(KEYCLOAK_URL);
     console.log(`finding client ${clientId}`);
     const users = (
       await axios.get(`${KEYCLOAK_ADMIN_URL}/clients`, {
