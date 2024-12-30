@@ -10,6 +10,14 @@ module.exports = async ({ _github, context, core, process }) => {
   console.log(process.env.SECRET_VALUE);
   console.log(process.env.PUBLIC_VALUE);
 
+  try {
+    //ensure the json value is valid before proceeding
+    JSON.parse(process.env.SECRET_JSON);
+    const MY_JSON = process.env.SECRET_JSON;
+  } catch (e) {
+    core.setFailed("failed parsing JSON please check github secret");
+  }
+
   const KEYCLOAK_URL = `https://${process.env.ENVIRONMENT}.loginproxy.gov.bc.ca/auth/realms/${process.env.REALM_ID}`;
   console.log(`KEYCLOAK_URL :: ${KEYCLOAK_URL}`);
   const KEYCLOAK_ADMIN_URL = `https://${process.env.ENVIRONMENT}.loginproxy.gov.bc.ca/auth/admin/realms/${process.env.REALM_ID}`;
@@ -51,10 +59,7 @@ module.exports = async ({ _github, context, core, process }) => {
       await deleteClient(id, token);
     }
     console.log(`creating client ${clientId}`);
-    await createClientFromJson(
-      process.env.SECRET_JSON.clients[clientId],
-      token
-    );
+    await createClientFromJson(MY_JSON.clients[clientId], token);
   };
   //end helper functions
 
@@ -74,13 +79,6 @@ module.exports = async ({ _github, context, core, process }) => {
       }
     )
   ).data.access_token;
-
-  try {
-    //ensure the json value is valid before proceeding
-    JSON.parse(process.env.SECRET_JSON);
-  } catch (e) {
-    core.setFailed("failed parsing JSON please check github secret");
-  }
 
   recreateClient("test-childcare-ecer-dev", token);
 
