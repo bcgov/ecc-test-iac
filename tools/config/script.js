@@ -52,7 +52,7 @@ module.exports = async ({ _github, context, core, process }) => {
     }
     console.log(`creating client ${clientId}`);
     await createClientFromJson(
-      this.process.env.SECRET_JSON.clients[clientId],
+      process.env.SECRET_JSON.clients[clientId],
       token
     );
   };
