@@ -8,12 +8,8 @@ jobs:
     steps:
       - name: check out repository
         uses: actions/checkout@v4
-      - name: Install oc
-        uses: redhat-actions/openshift-tools-installer@v1
-        with:
-          oc: 4
       - name: download dependencies
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "20.x"
       - run: cd tools/config && npm ci
@@ -31,5 +27,5 @@ jobs:
         with:
           script: |
             const script = require('./tools/config/script.js');
-            script({github, context, core, process, exec})
+            script({github, context, core, process})
       - run: echo "🍏 This job's status is ${{ job.status }}."

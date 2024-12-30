@@ -2,15 +2,13 @@ const axios = require("axios");
 
 // @ts-check
 /** @param {import('github-script').AsyncFunctionArguments} AsyncFunctionArguments */
-module.exports = async ({ _github, context, core, process, exec }) => {
+module.exports = async ({ _github, context, core, process }) => {
   console.log(`SHA: ${context.sha}`);
   console.log(`REF: ${context.ref}`);
   console.log("environment variables");
   console.log(process.env.REALM_ID);
   console.log(process.env.SECRET_VALUE);
   console.log(process.env.PUBLIC_VALUE);
-  const testOutput = await exec.exec("oc version");
-  console.log(testOutput);
 
   try {
     //ensure the json value is valid before proceeding
