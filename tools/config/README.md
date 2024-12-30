@@ -14,15 +14,15 @@
 
 ```json
 {
-    "clients": {
-        "<<clientId>>": {}
-    },
-    "identityProviders": {
-        "<<identityName>>": {}
-        "mappers": {
-            "<<mapperName>>": {}
-        }
+  "clients": {
+    "<<clientId>>": {}
+  },
+  "identityProviders": {
+    "<<identityName>>": {
+      "data": {},
+      "mappers": [{}]
     }
+  }
 }
 ```
 
