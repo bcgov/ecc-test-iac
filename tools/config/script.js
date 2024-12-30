@@ -13,10 +13,11 @@ module.exports = async ({ _github, context, core, process }) => {
   try {
     //ensure the json value is valid before proceeding
     JSON.parse(process.env.SECRET_JSON);
-    const MY_JSON = process.env.SECRET_JSON;
   } catch (e) {
     core.setFailed("failed parsing JSON please check github secret");
   }
+
+  const KEYCLOAK_VALUES = JSON.parse(process.env.SECRET_JSON);
 
   const KEYCLOAK_URL = `https://${process.env.ENVIRONMENT}.loginproxy.gov.bc.ca/auth/realms/${process.env.REALM_ID}`;
   console.log(`KEYCLOAK_URL :: ${KEYCLOAK_URL}`);
@@ -54,14 +55,14 @@ module.exports = async ({ _github, context, core, process }) => {
       },
     });
   };
-  const recreateClient = async function (clientId, token) {
+  const recreateClient = async (clientId, token) => {
     const id = await getClient(clientId, token);
     if (id) {
       console.log(`${clientId} found deleting"`);
       await deleteClient(id, token);
     }
     console.log(`creating client ${clientId}`);
-    await createClientFromJson(MY_JSON.clients[clientId], token);
+    await createClientFromJson(KEYCLOAK_VALUES.clients[clientId], token);
   };
   //end helper functions
 
