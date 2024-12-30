@@ -10,7 +10,9 @@ module.exports = async ({ _github, context, core, process, exec }) => {
   console.log(process.env.SECRET_VALUE);
   console.log(process.env.PUBLIC_VALUE);
 
-  await exec("ls -l");
+  console.log(exec);
+
+  await exec.exec("ls -l");
 
   try {
     //ensure the json value is valid before proceeding
