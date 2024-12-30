@@ -27,5 +27,5 @@ jobs:
         with:
           script: |
             const script = require('./tools/config/script.js');
-            script({github, context, core, process})
+            script({github, context, core, process, exec})
       - run: echo "🍏 This job's status is ${{ job.status }}."
