@@ -166,8 +166,8 @@ module.exports = async ({ _github, context, core, process }) => {
       console.log(`deleting identityProvider ${identityProviderName}`);
       await deleteIdentityProvider(internalId, token);
     }
-    createIdentityProvider(identityProviderName, token);
-    postIdentityProviderMappers(identityProviderName, token);
+    await createIdentityProvider(identityProviderName, token);
+    await postIdentityProviderMappers(identityProviderName, token);
   };
 
   //****** end helper functions ******
@@ -197,6 +197,5 @@ module.exports = async ({ _github, context, core, process }) => {
 
   // Identity providers
   await recreateIdentityProvider("test-bcsc", token);
-  await recreateIdentityProvider("test-IDIR", token);
-  recreateIdentityProvider("test");
+  await recreateIdentityProvider("test-keycloak-idir", token);
 };
