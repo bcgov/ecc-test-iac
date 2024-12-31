@@ -19,15 +19,36 @@ module.exports = async ({ _github, context, core, process }) => {
 
   const KEYCLOAK_VALUES = JSON.parse(process.env.SECRET_JSON);
 
-  const KEYCLOAK_URL = `https://${process.env.ENVIRONMENT}.loginproxy.gov.bc.ca/auth/realms/${process.env.REALM_ID}`;
+  const KEYCLOAK_URL = `https://${
+    process.env.ENVIRONMENT !== "prod" ? `${process.env.ENVIRONMENT}.` : ""
+  }loginproxy.gov.bc.ca/auth/realms/${process.env.REALM_ID}`;
   console.log(`KEYCLOAK_URL :: ${KEYCLOAK_URL}`);
-  const KEYCLOAK_ADMIN_URL = `https://${process.env.ENVIRONMENT}.loginproxy.gov.bc.ca/auth/admin/realms/${process.env.REALM_ID}`;
+  const KEYCLOAK_ADMIN_URL = `https://${
+    process.env.ENVIRONMENT !== "prod" ? `${process.env.ENVIRONMENT}.` : ""
+  }loginproxy.gov.bc.ca/auth/admin/realms/${process.env.REALM_ID}`;
   console.log(`KEYCLOAK_ADMIN_URL :: ${KEYCLOAK_ADMIN_URL}`);
+
+  console.log("obtaining token");
+  const token = (
+    await axios.post(
+      `${KEYCLOAK_URL}/protocol/openid-connect/token`,
+      {
+        grant_type: "client_credentials",
+        client_id: process.env.CLIENT_ID,
+        client_secret: process.env.CLIENT_SECRET,
+      },
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    )
+  ).data.access_token;
 
   //****** helper functions ******
 
   //creating clients
-  const getClient = async (clientId, token) => {
+  const getClient = async (clientId) => {
     console.log(`finding client ${clientId}`);
     const users = (
       await axios.get(`${KEYCLOAK_ADMIN_URL}/clients`, {
@@ -39,7 +60,7 @@ module.exports = async ({ _github, context, core, process }) => {
     return user?.id;
   };
 
-  const createClientFromJson = async (data, token) => {
+  const createClientFromJson = async (data) => {
     await axios.post(`${KEYCLOAK_ADMIN_URL}/clients`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -48,7 +69,7 @@ module.exports = async ({ _github, context, core, process }) => {
     });
   };
 
-  const deleteClient = async (id, token) => {
+  const deleteClient = async (id) => {
     await axios.delete(`${KEYCLOAK_ADMIN_URL}/clients/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -65,22 +86,21 @@ module.exports = async ({ _github, context, core, process }) => {
 
  * @async
  * @param {string} clientId - The ID of the client to recreate. 
- * @param {string} token - The access token required for Keycloak API interactions.
  * @returns {Promise<void>} - Resolves when the client is successfully recreated.
  */
-  const recreateClient = async (clientId, token) => {
-    const id = await getClient(clientId, token);
+  const recreateClient = async (clientId) => {
+    const id = await getClient(clientId);
     if (id) {
       console.log(`deleting existing client ${clientId}`);
-      await deleteClient(id, token);
+      await deleteClient(id);
     }
     console.log(`creating client ${clientId}`);
-    await createClientFromJson(KEYCLOAK_VALUES.clients[clientId], token);
+    await createClientFromJson(KEYCLOAK_VALUES.clients[clientId]);
   };
 
   //identity provider functions
 
-  const getIdentityProvider = async (identityProviderName, token) => {
+  const getIdentityProvider = async (identityProviderName) => {
     const identityProviders = (
       await axios.get(`${KEYCLOAK_ADMIN_URL}/identity-provider/instances`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -93,7 +113,7 @@ module.exports = async ({ _github, context, core, process }) => {
     return identityProvider?.internalId;
   };
 
-  const deleteIdentityProvider = async (internalId, token) => {
+  const deleteIdentityProvider = async (internalId) => {
     await axios.delete(
       `${KEYCLOAK_ADMIN_URL}/identity-provider/instances/${internalId}`,
       {
@@ -104,7 +124,7 @@ module.exports = async ({ _github, context, core, process }) => {
     );
   };
 
-  const createIdentityProvider = async (identityProviderName, token) => {
+  const createIdentityProvider = async (identityProviderName) => {
     console.log(`creating identity provider :: ${identityProviderName}`);
     try {
       await axios.post(
@@ -122,7 +142,7 @@ module.exports = async ({ _github, context, core, process }) => {
     }
   };
 
-  const postIdentityProviderMappers = async (identityProviderName, token) => {
+  const postIdentityProviderMappers = async (identityProviderName) => {
     console.log(
       `adding mappers for identity provider :: ${identityProviderName}`
     );
@@ -157,45 +177,47 @@ module.exports = async ({ _github, context, core, process }) => {
    *
    * @async
    * @param {string} identityProviderName - The name of the Identity Provider to recreate.
-   * @param {string} token - The access token required for Keycloak API interactions.
    * @returns {Promise<void>} - Resolves when the Identity Provider is successfully recreated.
    */
-  const recreateIdentityProvider = async (identityProviderName, token) => {
-    const internalId = await getIdentityProvider(identityProviderName, token);
+  const recreateIdentityProvider = async (identityProviderName) => {
+    const internalId = await getIdentityProvider(identityProviderName);
     if (internalId) {
       console.log(`deleting identityProvider ${identityProviderName}`);
-      await deleteIdentityProvider(internalId, token);
+      await deleteIdentityProvider(internalId);
     }
-    await createIdentityProvider(identityProviderName, token);
-    await postIdentityProviderMappers(identityProviderName, token);
+    await createIdentityProvider(identityProviderName);
+    await postIdentityProviderMappers(identityProviderName);
+  };
+
+  //realm config
+  const putRealmSettings = async () => {
+    console.log("setting realm settings");
+    await axios.put(
+      `${KEYCLOAK_ADMIN_URL}`,
+      {
+        loginWithEmailAllowed: false,
+        duplicateEmailsAllowed: true,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
   };
 
   //****** end helper functions ******
 
-  console.log("obtaining token");
-  const token = (
-    await axios.post(
-      `${KEYCLOAK_URL}/protocol/openid-connect/token`,
-      {
-        grant_type: "client_credentials",
-        client_id: process.env.CLIENT_ID,
-        client_secret: process.env.CLIENT_SECRET,
-      },
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    )
-  ).data.access_token;
+  await putRealmSettings();
 
   //TODO replace remove test to try with the actual client names
   // Clients
-  await recreateClient("test-childcare-ecer-dev", token);
-  await recreateClient("test-childcare-ecer-api-dev", token);
-  await recreateClient("test-childcare-ecer-ew-dev", token);
+  await recreateClient("test-childcare-ecer-dev");
+  await recreateClient("test-childcare-ecer-api-dev");
+  await recreateClient("test-childcare-ecer-ew-dev");
 
   // Identity providers
-  await recreateIdentityProvider("test-bcsc", token);
-  await recreateIdentityProvider("test-keycloak-idir", token);
+  await recreateIdentityProvider("test-bcsc");
+  await recreateIdentityProvider("test-keycloak-idir");
 };
