@@ -25,6 +25,7 @@ module.exports = async ({ _github, context, core, process }) => {
   console.log(`KEYCLOAK_ADMIN_URL :: ${KEYCLOAK_ADMIN_URL}`);
 
   //****** helper functions ******
+
   //creating clients
   const getClient = async (clientId, token) => {
     console.log(`finding client ${clientId}`);
@@ -54,6 +55,19 @@ module.exports = async ({ _github, context, core, process }) => {
       },
     });
   };
+
+  /**
+ * Recreates an existing Keycloak client.
+
+ * This function first attempts to delete the existing client with the given ID. 
+ * If the deletion is successful, it then creates a new client with the same ID 
+ * using the provided configuration.
+
+ * @async
+ * @param {string} clientId - The ID of the client to recreate. 
+ * @param {string} token - The access token required for Keycloak API interactions.
+ * @returns {Promise<void>} - Resolves when the client is successfully recreated.
+ */
   const recreateClient = async (clientId, token) => {
     const id = await getClient(clientId, token);
     if (id) {
@@ -64,41 +78,8 @@ module.exports = async ({ _github, context, core, process }) => {
     await createClientFromJson(KEYCLOAK_VALUES.clients[clientId], token);
   };
 
-  //creating identity providers
-  // const createIdentityProvider = async (identityProviderName, token) => {
-  //   console.log(`creating identity provider :: ${identityProviderName}`);
-  //   await axios.post(
-  //     `${KEYCLOAK_ADMIN_URL}/identity-provider/instances`,
-  //     KEYCLOAK_VALUES.identityProviders[identityProviderName].data,
-  //     {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //         "Content-Type": "application/json",
-  //       },
-  //     }
-  //   );
-  // };
+  //identity provider functions
 
-  // const postIdentityProviderMappers = async (identityProviderName, token) => {
-  //   console.log(
-  //     `adding mappers for identity provider :: ${identityProviderName}`
-  //   );
-  //   const mapperPromiseArray = KEYCLOAK_VALUES.identityProviders[
-  //     identityProviderName
-  //   ].mappers.map(async (mapper) => {
-  //     await axios.post(
-  //       `${KEYCLOAK_ADMIN_URL}/identity-provider/instances/${identityProviderName}/mappers`,
-  //       mapper,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "Content-Type": "application/json",
-  //         },
-  //       }
-  //     );
-  //   });
-  //   await Promise.all(mapperPromiseArray);
-  // };
   const getIdentityProvider = async (identityProviderName, token) => {
     const identityProviders = (
       await axios.get(`${KEYCLOAK_ADMIN_URL}/identity-provider/instances`, {
@@ -167,6 +148,18 @@ module.exports = async ({ _github, context, core, process }) => {
     await Promise.all(mapperPromiseArray);
   };
 
+  /**
+   * Recreates an existing Identity Provider in Keycloak.
+   *
+   * This function first attempts to delete the existing Identity Provider with the given name.
+   * If the deletion is successful, it then creates a new Identity Provider with the same name
+   * and applies the necessary mappers.
+   *
+   * @async
+   * @param {string} identityProviderName - The name of the Identity Provider to recreate.
+   * @param {string} token - The access token required for Keycloak API interactions.
+   * @returns {Promise<void>} - Resolves when the Identity Provider is successfully recreated.
+   */
   const recreateIdentityProvider = async (identityProviderName, token) => {
     const internalId = await getIdentityProvider(identityProviderName, token);
     if (internalId) {
@@ -176,6 +169,7 @@ module.exports = async ({ _github, context, core, process }) => {
     createIdentityProvider(identityProviderName, token);
     postIdentityProviderMappers(identityProviderName, token);
   };
+
   //****** end helper functions ******
 
   console.log("obtaining token");
@@ -197,10 +191,12 @@ module.exports = async ({ _github, context, core, process }) => {
 
   //TODO replace remove test to try with the actual client names
   // Clients
-  recreateClient("test-childcare-ecer-dev", token);
-  recreateClient("test-childcare-ecer-api-dev", token);
-  recreateClient("test-childcare-ecer-ew-dev", token);
+  await recreateClient("test-childcare-ecer-dev", token);
+  await recreateClient("test-childcare-ecer-api-dev", token);
+  await recreateClient("test-childcare-ecer-ew-dev", token);
 
   // Identity providers
-  recreateIdentityProvider("test-bcsc", token);
+  await recreateIdentityProvider("test-bcsc", token);
+  await recreateIdentityProvider("test-IDIR", token);
+  recreateIdentityProvider("test");
 };
