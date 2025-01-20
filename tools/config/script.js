@@ -23,6 +23,7 @@ module.exports = async ({ _github, context, core, process }) => {
     process.env.ENVIRONMENT !== "prod" ? `${process.env.ENVIRONMENT}.` : ""
   }loginproxy.gov.bc.ca/auth/realms/${process.env.REALM_ID}`;
   console.log(`KEYCLOAK_URL :: ${KEYCLOAK_URL}`);
+
   const KEYCLOAK_ADMIN_URL = `https://${
     process.env.ENVIRONMENT !== "prod" ? `${process.env.ENVIRONMENT}.` : ""
   }loginproxy.gov.bc.ca/auth/admin/realms/${process.env.REALM_ID}`;
@@ -216,6 +217,11 @@ module.exports = async ({ _github, context, core, process }) => {
   await recreateClient("test-childcare-ecer-dev");
   await recreateClient("test-childcare-ecer-api-dev");
   await recreateClient("test-childcare-ecer-ew-dev");
+
+  // EFX ECER Dev Clients
+  await recreateClient("childcare-ecer-efxdev");
+  await recreateClient("childcare-ecer-api-efxdev");
+  await recreateClient("childcare-ecer-ew-efxdev");
 
   // Identity providers
   await recreateIdentityProvider("test-bcsc");
