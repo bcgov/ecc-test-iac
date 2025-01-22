@@ -7,25 +7,31 @@ env:
   OPENSHIFT_SERVER: ${{ vars.OPENSHIFT_SERVER }}
   OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
   OPENSHIFT_NAMESPACE: ${{ secrets.ECER_NAMESPACE_NO_ENV }}-tools
-  APP_ENVIRONMENT: "testing-iac"
-
-  # REPO_NAME: "educ-edx"
-  # BRANCH: "master"
-  # NAMESPACE: ${{ secrets.EDX_NAMESPACE_NO_ENV }}
+  APP_ENVIRONMENT: "efxdev"
 
 on:
   # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
   workflow_dispatch:
     inputs:
       version:
-        description: "Version Number ex. 1.0.0, 1.0.1 etc"
+        description: "Version ex. master, release-1.0.0 or release-1.0.1 .etc"
         default: "master"
         required: true
 
 jobs:
+  check-input:
+    name: Check User Input
+    runs-on: ubuntu-22.04
+    run:
+      if [[ "${{github.event.inputs.version}}" == "master" ]] || [[ "${{github.event.inputs.version}}" == "release-"* ]]; then
+      echo "user input validated ${{github.event.inputs.version}}"
+      else
+      echo "::error::input must be 'master' or 'release-*'"
+      exit 1
+      fi
+
   openshift-cd:
     name: Tag Image
-    # ubuntu-latest can also be used.
     runs-on: ubuntu-22.04
     environment: efxdev
 
@@ -64,5 +70,5 @@ jobs:
 
           echo promoting ${{github.event.inputs.version}} imagestream to ${{env.APP_ENVIRONMENT}}
 
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} registry-portal:master registry-portal:${{env.APP_ENVIRONMENT}}
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} api:master api:${{env.APP_ENVIRONMENT}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} registry-portal:${{github.event.inputs.version}} registry-portal:${{env.APP_ENVIRONMENT}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} api:${{github.event.inputs.version}} api:${{env.APP_ENVIRONMENT}}
