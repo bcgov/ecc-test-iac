@@ -1,4 +1,4 @@
-name: Promote to EFXDev
+name: Promote to EFXTest
 
 env:
   # 🖊️ EDIT your repository secrets to log into your OpenShift cluster and set up the context.
@@ -7,37 +7,23 @@ env:
   OPENSHIFT_SERVER: ${{ vars.OPENSHIFT_SERVER }}
   OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
   OPENSHIFT_NAMESPACE: ${{ secrets.ECER_NAMESPACE_NO_ENV }}-tools
-  APP_ENVIRONMENT_DESTINATION: "efxdev"
-  APP_ENVIRONMENT_SOURCE: $${{ github.event.inputs.version }}
+  APP_ENVIRONMENT: "efxtest"
 
 on:
   # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
   workflow_dispatch:
-    inputs:
-      version:
-        description: "Version ex. master, release-1.0.0 or release-1.0.1 .etc"
-        default: "master"
-        required: true
 
 jobs:
   openshift-cd:
     name: Promote Image
     runs-on: ubuntu-22.04
-    environment: efxdev
+    environment: efxtest
 
     outputs:
       ROUTE: ${{ steps.deploy-and-expose.outputs.route }}
       SELECTOR: ${{ steps.deploy-and-expose.outputs.selector }}
 
     steps:
-      - name: Check User Input
-        run: |
-          if [[ "${{env.APP_ENVIRONMENT_SOURCE}}" == "master" ]] || [[ "${{env.APP_ENVIRONMENT_SOURCE}}" == "release-"* ]]; then
-            echo user input validated ${{env.APP_ENVIRONMENT_SOURCE}}
-          else
-            echo ::error::input must be 'master' or 'release-*'
-            exit 1
-          fi
       - name: Check out repository
         uses: actions/checkout@v3
       - name: Install oc
@@ -50,12 +36,11 @@ jobs:
       - name: Tag in OpenShift
         run: |
           set -eux
-          echo VERSION: ${{env.APP_ENVIRONMENT_SOURCE}}
           # Login to OpenShift and select project
           oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
           oc project ${{ env.OPENSHIFT_NAMESPACE }}
 
-          echo promoting ${{env.APP_ENVIRONMENT_SOURCE}} imagestream to ${{env.APP_ENVIRONMENT_DESTINATION}}
+          echo promoting efxdev imagestream to ${{env.APP_ENVIRONMENT}}
 
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true registry-portal:${{env.APP_ENVIRONMENT_SOURCE}} registry-portal:${{env.APP_ENVIRONMENT_DESTINATION}}
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true api:${{env.APP_ENVIRONMENT_SOURCE}} api:${{env.APP_ENVIRONMENT_DESTINATION}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true registry-portal:efxdev registry-portal:${{env.APP_ENVIRONMENT}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true api:efxdev api:${{env.APP_ENVIRONMENT}}
