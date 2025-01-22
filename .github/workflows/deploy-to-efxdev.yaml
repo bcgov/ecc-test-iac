@@ -19,17 +19,6 @@ on:
         required: true
 
 jobs:
-  check-input:
-    name: Check User Input
-    runs-on: ubuntu-22.04
-    run:
-      if [[ "${{github.event.inputs.version}}" == "master" ]] || [[ "${{github.event.inputs.version}}" == "release-"* ]]; then
-      echo "user input validated ${{github.event.inputs.version}}"
-      else
-      echo "::error::input must be 'master' or 'release-*'"
-      exit 1
-      fi
-
   openshift-cd:
     name: Tag Image
     runs-on: ubuntu-22.04
@@ -40,6 +29,14 @@ jobs:
       SELECTOR: ${{ steps.deploy-and-expose.outputs.selector }}
 
     steps:
+      - name: Check User Input
+        run:
+          if [[ "${{github.event.inputs.version}}" == "master" ]] || [[ "${{github.event.inputs.version}}" == "release-"* ]]; then
+          echo "user input validated ${{github.event.inputs.version}}"
+          else
+          echo "::error::input must be 'master' or 'release-*'"
+          exit 1
+          fi
       - name: Check out repository
         uses: actions/checkout@v3
 
