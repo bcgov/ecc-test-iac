@@ -31,11 +31,11 @@ jobs:
     steps:
       - name: Check User Input
         run: |
-        if [[ "${{github.event.inputs.version}}" == "master" ]] || [[ "${{github.event.inputs.version}}" == "release-"* ]]; then
-            echo user input validated ${{github.event.inputs.version}}
-          else
-            echo ::error::input must be 'master' or 'release-*'
-            exit 1
+          if [[ "${{github.event.inputs.version}}" == "master" ]] || [[ "${{github.event.inputs.version}}" == "release-"* ]]; then \
+            echo user input validated ${{github.event.inputs.version}} \
+          else \
+            echo ::error::input must be 'master' or 'release-*' \
+            exit 1 \
           fi
       - name: Check out repository
         uses: actions/checkout@v3
