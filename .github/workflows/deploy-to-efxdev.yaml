@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Check User Input
-        run:
+        run: |
           if [[ "${{github.event.inputs.version}}" == "master" ]] || [[ "${{github.event.inputs.version}}" == "release-"* ]]; then
           echo "user input validated ${{github.event.inputs.version}}"
           else
