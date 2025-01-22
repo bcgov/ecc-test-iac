@@ -35,7 +35,7 @@ jobs:
           if [[ "${{env.APP_ENVIRONMENT_SOURCE}}" == "master" ]] || [[ "${{env.APP_ENVIRONMENT_SOURCE}}" == "release-"* ]]; then
             echo user input validated ${{env.APP_ENVIRONMENT_SOURCE}}
           else
-            echo ::error::input must be 'master' or 'release-*'
+            echo ::error::input must be 'master' or 'release-*' your input was ${{APP_ENVIRONMENT_SOURCE}}
             exit 1
           fi
       - name: Check out repository
