@@ -7,7 +7,8 @@ env:
   OPENSHIFT_SERVER: ${{ vars.OPENSHIFT_SERVER }}
   OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
   OPENSHIFT_NAMESPACE: ${{ secrets.ECER_NAMESPACE_NO_ENV }}-tools
-  APP_ENVIRONMENT: "efxtest"
+  APP_ENVIRONMENT_SOURCE: "efxdev"
+  APP_ENVIRONMENT_DESTINATION: "efxtest"
 
 on:
   # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
@@ -40,7 +41,7 @@ jobs:
           oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
           oc project ${{ env.OPENSHIFT_NAMESPACE }}
 
-          echo promoting efxdev imagestream to ${{env.APP_ENVIRONMENT}}
+          echo promoting ${{env.APP_ENVIRONMENT_SOURCE}} imagestream to ${{env.APP_ENVIRONMENT_DESTINATION}}
 
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true registry-portal:efxdev registry-portal:${{env.APP_ENVIRONMENT}}
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true api:efxdev api:${{env.APP_ENVIRONMENT}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true registry-portal:${{env.APP_ENVIRONMENT_SOURCE}} registry-portal:${{env.APP_ENVIRONMENT_DESTINATION}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true api:${{env.APP_ENVIRONMENT_SOURCE}} api:${{env.APP_ENVIRONMENT_DESTINATION}}
