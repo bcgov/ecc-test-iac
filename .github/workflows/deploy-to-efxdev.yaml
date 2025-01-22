@@ -8,7 +8,7 @@ env:
   OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
   OPENSHIFT_NAMESPACE: ${{ secrets.ECER_NAMESPACE_NO_ENV }}-tools
   APP_ENVIRONMENT_DESTINATION: "efxdev"
-  APP_ENVIRONMENT_SOURCE: $${{ github.event.inputs.version }}
+  APP_ENVIRONMENT_SOURCE: ${{ github.event.inputs.version }}
 
 on:
   # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
