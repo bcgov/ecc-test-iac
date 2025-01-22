@@ -8,7 +8,7 @@
 | ------------- | ------------------------------------- | ------- |
 | CLIENT_ID     | service account for keycloak          | string  |
 | CLIENT_SECRET | service account for keycloak password | string  |
-| PAYLOAD_JSON  | payload                               | JSON \* |
+| SECRET_JSON   | payload keycloak values               | JSON \* |
 
 \*JSON format expected for the github secret
 
