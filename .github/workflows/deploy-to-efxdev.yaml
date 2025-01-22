@@ -32,6 +32,7 @@ jobs:
     steps:
       - name: Check User Input
         run: |
+          echo SOURCE ${{env.APP_ENVIRONMENT_SOURCE}}
           if [[ "${{env.APP_ENVIRONMENT_SOURCE}}" == "master" ]] || [[ "${{env.APP_ENVIRONMENT_SOURCE}}" == "release-"* ]]; then
             echo user input validated ${{env.APP_ENVIRONMENT_SOURCE}}
           else
