@@ -32,11 +32,11 @@ jobs:
     steps:
       - name: Check User Input
         run: |
-          echo SOURCE ${{env.APP_ENVIRONMENT_SOURCE}}
-          if [[ "${{env.APP_ENVIRONMENT_SOURCE}}" == "master" ]] || [[ "${{env.APP_ENVIRONMENT_SOURCE}}" == "release-"* ]]; then
-            echo user input validated ${{env.APP_ENVIRONMENT_SOURCE}}
+          echo SOURCE ${{github.event.inputs.version}}
+          if [[ "${{github.event.inputs.version}}" == "master" ]] || [[ "${{github.event.inputs.version}}" == "release-"* ]]; then
+            echo user input validated ${{github.event.inputs.version}}
           else
-            echo ::error::input must be 'master' or 'release-*' your input was ${{env.APP_ENVIRONMENT_SOURCE}}
+            echo ::error::input must be 'master' or 'release-*' your input was ${{github.event.inputs.version}}
             exit 1
           fi
       - name: Check out repository
@@ -51,12 +51,12 @@ jobs:
       - name: Tag in OpenShift
         run: |
           set -eux
-          echo VERSION: ${{env.APP_ENVIRONMENT_SOURCE}}
+          echo VERSION: ${{github.event.inputs.version}}
           # Login to OpenShift and select project
           oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
           oc project ${{ env.OPENSHIFT_NAMESPACE }}
 
-          echo promoting ${{env.APP_ENVIRONMENT_SOURCE}} imagestream to ${{env.APP_ENVIRONMENT_DESTINATION}}
+          echo promoting ${{github.event.inputs.version}} imagestream to ${{env.APP_ENVIRONMENT_DESTINATION}}
 
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true registry-portal:${{env.APP_ENVIRONMENT_SOURCE}} registry-portal:${{env.APP_ENVIRONMENT_DESTINATION}}
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true api:${{env.APP_ENVIRONMENT_SOURCE}} api:${{env.APP_ENVIRONMENT_DESTINATION}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true registry-portal:${{github.event.inputs.version}} registry-portal:${{env.APP_ENVIRONMENT_DESTINATION}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true api:${{github.event.inputs.version}} api:${{env.APP_ENVIRONMENT_DESTINATION}}
