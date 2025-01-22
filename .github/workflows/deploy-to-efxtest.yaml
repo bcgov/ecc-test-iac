@@ -43,5 +43,5 @@ jobs:
 
           echo promoting ${{env.APP_ENVIRONMENT_SOURCE}} imagestream to ${{env.APP_ENVIRONMENT_DESTINATION}}
 
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true registry-portal:${{env.APP_ENVIRONMENT_SOURCE}} registry-portal:${{env.APP_ENVIRONMENT_DESTINATION}}
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true api:${{env.APP_ENVIRONMENT_SOURCE}} api:${{env.APP_ENVIRONMENT_DESTINATION}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} registry-portal:${{env.APP_ENVIRONMENT_SOURCE}} registry-portal:${{env.APP_ENVIRONMENT_DESTINATION}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} api:${{env.APP_ENVIRONMENT_SOURCE}} api:${{env.APP_ENVIRONMENT_DESTINATION}}
