@@ -1,4 +1,4 @@
-name: Create Tag
+name: Promote to EFXDev
 
 env:
   # 🖊️ EDIT your repository secrets to log into your OpenShift cluster and set up the context.
@@ -20,7 +20,7 @@ on:
 
 jobs:
   openshift-cd:
-    name: Tag Image
+    name: Promote Image
     runs-on: ubuntu-22.04
     environment: efxdev
 
@@ -39,17 +39,6 @@ jobs:
           fi
       - name: Check out repository
         uses: actions/checkout@v3
-
-      # - name: Create tag
-      #   uses: actions/github-script@v6
-      #   with:
-      #     script: |
-      #       github.rest.git.createRef({
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         ref: 'refs/tags/${{ github.event.inputs.version }}',
-      #         sha: context.sha
-      #       })
       - name: Install oc
         uses: redhat-actions/openshift-tools-installer@v1
         with:
