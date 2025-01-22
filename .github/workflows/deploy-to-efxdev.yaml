@@ -67,5 +67,5 @@ jobs:
 
           echo promoting ${{github.event.inputs.version}} imagestream to ${{env.APP_ENVIRONMENT}}
 
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} registry-portal:${{github.event.inputs.version}} registry-portal:${{env.APP_ENVIRONMENT}}
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} api:${{github.event.inputs.version}} api:${{env.APP_ENVIRONMENT}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true registry-portal:${{github.event.inputs.version}} registry-portal:${{env.APP_ENVIRONMENT}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true api:${{github.event.inputs.version}} api:${{env.APP_ENVIRONMENT}}
