@@ -7,6 +7,7 @@ env:
   OPENSHIFT_SERVER: ${{ vars.OPENSHIFT_SERVER }}
   OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
   OPENSHIFT_NAMESPACE: ${{ secrets.ECER_NAMESPACE_NO_ENV }}-tools
+  APP_ENVIRONMENT: "testing-iac"
 
   # REPO_NAME: "educ-edx"
   # BRANCH: "master"
@@ -17,7 +18,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version Number"
+        description: "Version Number ex. 1.0.0, 1.0.1 etc"
         default: "master"
         required: true
 
@@ -56,11 +57,12 @@ jobs:
       - name: Tag in OpenShift
         run: |
           set -eux
-          echo VERSION: ${{github.event.input.version}}
+          echo VERSION: ${{github.event.inputs.version}}
           # Login to OpenShift and select project
           oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
           oc project ${{ env.OPENSHIFT_NAMESPACE }}
 
-          # oc tag -n ${{env.NAMESPACE}} registry-portal:master registry-portal:efxdev
-          # oc tag -n ${{env.NAMESPACE}} api:master registry-portal:efxdev
-          # oc tag ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-backend-${{ env.BRANCH }}:latest ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-backend-${{ env.BRANCH }}:${{ github.event.inputs.version }}
+          echo promoting ${{github.event.inputs.version}} imagestream to ${{env.APP_ENVIRONMENT}}
+
+          oc tag -n ${{env.NAMESPACE}} registry-portal:master registry-portal:${{env.APP_ENVIRONMENT}}
+          oc tag -n ${{env.NAMESPACE}} api:master registry-portal:${{env.APP_ENVIRONMENT}}
