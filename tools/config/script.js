@@ -209,20 +209,30 @@ module.exports = async ({ _github, context, core, process }) => {
 
   //****** end helper functions ******
 
+  //****** Settings for all environments
   await putRealmSettings();
 
-  //TODO replace remove test to try with the actual client names
-  // Clients
-  await recreateClient("test-childcare-ecer-dev");
-  await recreateClient("test-childcare-ecer-api-dev");
-  await recreateClient("test-childcare-ecer-ew-dev");
+  //****** DEV keycloak environment ******
 
-  // EFX ECER Dev Clients
-  await recreateClient("childcare-ecer-efxdev");
-  await recreateClient("childcare-ecer-api-efxdev");
-  await recreateClient("childcare-ecer-ew-efxdev");
+  if (process.env.ENVIRONMENT === "dev") {
+    // Clients
+    await recreateClient("childcare-ecer-dev");
+    await recreateClient("childcare-ecer-api-dev");
+    await recreateClient("childcare-ecer-ew-dev");
 
-  // Identity providers
-  await recreateIdentityProvider("test-bcsc");
-  await recreateIdentityProvider("test-keycloak-idir");
+    //TODO replace remove test to try with the actual client names
+    // Identity providers
+    await recreateIdentityProvider("test-bcsc");
+    await recreateIdentityProvider("test-keycloak-idir");
+  }
+
+  //****** TEST keycloak environment ******
+  else if (process.env.ENVIRONMENT === "test") {
+    // Test clients
+    await recreateClient("test-childcare-ecer-test");
+    await recreateClient("test-childcare-ecer-api-test");
+    await recreateClient("test-childcare-ecer-ew-test");
+    // UAT clients
+    // EFXTest clients
+  }
 };

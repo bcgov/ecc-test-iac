@@ -1,0 +1,28 @@
+name: DEV - Deploy to Keycloak Infrastructure As Code
+on:
+  workflow_dispatch:
+jobs:
+  keycloak-infrastructure-as-code:
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: check out repository
+        uses: actions/checkout@v4
+      - name: download dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+      - run: cd tools/config && npm ci
+      - name: run script
+        uses: actions/github-script@v7
+        env:
+          REALM_ID: "childcare-applications"
+          ENVIRONMENT: "test"
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          SECRET_JSON: ${{ secrets.SECRET_JSON }}
+        with:
+          script: |
+            const script = require('./tools/config/script.js');
+            script({github, context, core, process})
+      - run: echo "🍏 This job's status is ${{ job.status }}."
