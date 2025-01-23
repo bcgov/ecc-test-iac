@@ -1,4 +1,4 @@
-name: DEV - Deploy to Keycloak Infrastructure As Code
+name: TEST - Deploy to Keycloak Infrastructure As Code
 on:
   workflow_dispatch:
 jobs:
