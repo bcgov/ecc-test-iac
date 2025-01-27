@@ -220,10 +220,9 @@ module.exports = async ({ _github, context, core, process }) => {
     await recreateClient("childcare-ecer-api-dev");
     await recreateClient("childcare-ecer-ew-dev");
 
-    //TODO replace remove test to try with the actual client names
     // Identity providers
-    await recreateIdentityProvider("test-bcsc");
-    await recreateIdentityProvider("test-keycloak-idir");
+    await recreateIdentityProvider("bceidbasic");
+    await recreateIdentityProvider("bcsc");
   }
 
   //****** TEST keycloak environment ******
@@ -232,5 +231,8 @@ module.exports = async ({ _github, context, core, process }) => {
     await recreateClient("childcare-ecer-test");
     await recreateClient("childcare-ecer-api-test");
     await recreateClient("childcare-ecer-ew-test");
+
+    await recreateIdentityProvider("bceidbasic");
+    await recreateIdentityProvider("bcsc");
   }
 };
