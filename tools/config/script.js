@@ -229,10 +229,8 @@ module.exports = async ({ _github, context, core, process }) => {
   //****** TEST keycloak environment ******
   else if (process.env.ENVIRONMENT === "test") {
     // Test clients
-    await recreateClient("test-childcare-ecer-test");
-    await recreateClient("test-childcare-ecer-api-test");
-    await recreateClient("test-childcare-ecer-ew-test");
-    // UAT clients
-    // EFXTest clients
+    await recreateClient("childcare-ecer-test");
+    await recreateClient("childcare-ecer-api-test");
+    await recreateClient("childcare-ecer-ew-test");
   }
 };
