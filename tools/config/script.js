@@ -113,17 +113,6 @@ module.exports = async ({ _github, context, core, process }) => {
     return identityProvider?.internalId;
   };
 
-  const deleteIdentityProvider = async (internalId) => {
-    await axios.delete(
-      `${KEYCLOAK_ADMIN_URL}/identity-provider/instances/${internalId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-  };
-
   const createIdentityProvider = async (identityProviderName) => {
     console.log(`creating identity provider :: ${identityProviderName}`);
     try {
@@ -179,13 +168,15 @@ module.exports = async ({ _github, context, core, process }) => {
    * @param {string} identityProviderName - The name of the Identity Provider to recreate.
    * @returns {Promise<void>} - Resolves when the Identity Provider is successfully recreated.
    */
-  const recreateIdentityProvider = async (identityProviderName) => {
+  const createIdentityProviderWithMappers = async (identityProviderName) => {
     const internalId = await getIdentityProvider(identityProviderName);
-    if (internalId) {
-      console.log(`deleting identityProvider ${identityProviderName}`);
-      await deleteIdentityProvider(internalId);
+    if (!internalId) {
+      console.log(
+        `identityProvider ${identityProviderName} not found :: creating`
+      );
+      await createIdentityProvider(identityProviderName);
     }
-    await createIdentityProvider(identityProviderName);
+
     await postIdentityProviderMappers(identityProviderName);
   };
 
@@ -221,8 +212,8 @@ module.exports = async ({ _github, context, core, process }) => {
     await recreateClient("childcare-ecer-ew-dev");
 
     // Identity providers
-    await recreateIdentityProvider("bceidbasic");
-    await recreateIdentityProvider("bcsc");
+    await createIdentityProviderWithMappers("bceidbasic");
+    await createIdentityProviderWithMappers("bcsc");
   }
 
   //****** TEST keycloak environment ******
@@ -232,7 +223,7 @@ module.exports = async ({ _github, context, core, process }) => {
     await recreateClient("childcare-ecer-api-test");
     await recreateClient("childcare-ecer-ew-test");
 
-    await recreateIdentityProvider("bceidbasic");
-    await recreateIdentityProvider("bcsc");
+    await createIdentityProviderWithMappers("bceidbasic");
+    await createIdentityProviderWithMappers("bcsc");
   }
 };
