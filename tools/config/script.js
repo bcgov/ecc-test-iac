@@ -135,6 +135,7 @@ module.exports = async ({ _github, context, core, process }) => {
     console.log(
       `adding mappers for identity provider :: ${identityProviderName}`
     );
+    console.log(`these calls will fail if they already exist`);
     const mapperPromiseArray = KEYCLOAK_VALUES.identityProviders[
       identityProviderName
     ].mappers.map(async (mapper) => {
