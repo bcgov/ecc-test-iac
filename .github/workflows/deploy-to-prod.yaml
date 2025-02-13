@@ -51,8 +51,8 @@ jobs:
           echo promoting ${{inputs.app_environment_source}} imagestream to ${{env.APP_ENVIRONMENT_DESTINATION}}
 
           #grabs the image sha for our input environments using jq
-          API_IMAGE_SHA = $(oc get is api -o json | jq -r '.spec.tags[] | select(.name == '${{inputs.app_environment_source}}').from.name')
-          REGISTRY_PORTAL_IMAGE_SHA = $(oc get is registry-portal -o json | jq -r '.spec.tags[] | select(.name == '${{inputs.app_environment_source}}').from.name')
+          API_IMAGE_SHA = $(oc get is api -o json | jq -r '.spec.tags[] | select(.name == "${{inputs.app_environment_source}}").from.name')
+          REGISTRY_PORTAL_IMAGE_SHA = $(oc get is registry-portal -o json | jq -r '.spec.tags[] | select(.name == "${{inputs.app_environment_source}}").from.name')
 
           echo registry-portal image sha being promoted: $REGISTRY_PORTAL_IMAGE_SHA
           echo api image sha being promoted: $API_IMAGE_SHA
