@@ -19,7 +19,8 @@ on:
         type: choice
         options:
           - efxtest
-          - uat
+          # no option to deploy from uat for now
+          # - uat
 
 jobs:
   openshift-cd:
@@ -56,5 +57,5 @@ jobs:
           echo registry-portal image sha being promoted: $REGISTRY_PORTAL_IMAGE_SHA
           echo api image sha being promoted: $API_IMAGE_SHA
 
-          # oc tag -n ${{env.OPENSHIFT_NAMESPACE}} registry-portal:${{env.APP_ENVIRONMENT_SOURCE}} registry-portal:${{env.APP_ENVIRONMENT_DESTINATION}}
-          # oc tag -n ${{env.OPENSHIFT_NAMESPACE}} api:${{env.APP_ENVIRONMENT_SOURCE}} api:${{env.APP_ENVIRONMENT_DESTINATION}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} registry-portal:${{inputs.app_environment_source}} registry-portal:${{env.APP_ENVIRONMENT_DESTINATION}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} api:${{inputs.app_environment_source}} api:${{env.APP_ENVIRONMENT_DESTINATION}}
