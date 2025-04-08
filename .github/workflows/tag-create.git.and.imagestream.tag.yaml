@@ -53,7 +53,8 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            echo ${{github}}
+            echo ${{github.event.inputs.version}}
+            echo ${{github.ref_name}}
             # github.rest.git.createRef({
             #   owner: context.repo.owner,
             #   repo: context.repo.repo,
