@@ -33,12 +33,8 @@ jobs:
     runs-on: ubuntu-22.04
     environment: dev
 
-    outputs:
-      ROUTE: ${{ steps.deploy-and-expose.outputs.route }}
-      SELECTOR: ${{ steps.deploy-and-expose.outputs.selector }}
-
     steps:
-      - name: Check User Input
+      - name: Check User Input and branch
         run: |
           regex='^[0-9]+\.[0-9]+\.[0-9]+$'
           if [[ "${{github.event.inputs.version}}" =~ $regex ]]; then
@@ -47,6 +43,14 @@ jobs:
             echo ::error::input must be in x.x.x format your input was ${{github.event.inputs.version}}
             exit 1
           fi
+
+          if [[ "${{github.ref_name}}" == "master" ]] || [[ "${{github.ref_name}}" == "release/master"* ]]; then
+            echo user input validated ${{github.event.inputs.version}}
+          else
+            echo ::error:: we must run workflow from master or release/master branch your branch was ${{github.event.inputs.version}}
+            exit 1
+          fi
+
       - name: Check out repository
         uses: actions/checkout@v3
 
@@ -56,27 +60,28 @@ jobs:
           script: |
             console.log(`this action was run on branch :: ${context.ref}`);
             console.log(`SHA :: ${context.sha}`);
-            console.log('hello world just testing');
-            github.rest.git.createRef({
-              owner: context.actor,
+            console.log(`Action run by :: ${context.actor}`);
+
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/tags/${{ github.event.inputs.version }}',
               sha: context.sha
             })
 
-    # - name: Install oc
-    #   uses: redhat-actions/openshift-tools-installer@v1
-    #   with:
-    #     oc: 4
+      - name: Install oc
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: 4
 
-    #   # https://github.com/redhat-actions/oc-login#readme
-    # - uses: actions/checkout@v3
-    # - name: Tag in OpenShift
-    #   run: |
-    #     set -eux
-    #     # Login to OpenShift and select project
-    #     oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
-    #     oc project ${{ env.OPENSHIFT_NAMESPACE }}
+        # https://github.com/redhat-actions/oc-login#readme
+      - uses: actions/checkout@v3
+      - name: Tag in OpenShift
+        run: |
+          set -eux
+          # Login to OpenShift and select project
+          oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
+          oc project ${{ env.OPENSHIFT_NAMESPACE }}
 
-    #     oc tag ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-frontend-static:latest ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-frontend-static:${{ github.event.inputs.version }}
-    #     oc tag ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-backend-${{ env.BRANCH }}:latest ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-backend-${{ env.BRANCH }}:${{ github.event.inputs.version }}
+          oc tag ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-frontend-static:latest ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-frontend-static:${{ github.event.inputs.version }}
+          oc tag ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-backend-${{ env.BRANCH }}:latest ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-backend-${{ env.BRANCH }}:${{ github.event.inputs.version }}
