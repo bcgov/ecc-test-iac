@@ -54,12 +54,15 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ github.event.inputs.version }}',
-              sha: context.sha
-            })
+            console.log('GitHub Context:', github);
+            console.log('GitHub Event:', github.event);
+            console.log('GitHub Event Inputs:', github.event.inputs);
+            # github.rest.git.createRef({
+            #   owner: context.repo.owner,
+            #   repo: context.repo.repo,
+            #   ref: 'refs/tags/${{ github.event.inputs.version }}',
+            #   sha: context.sha
+            # })
 
     # - name: Install oc
     #   uses: redhat-actions/openshift-tools-installer@v1
