@@ -54,8 +54,14 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            console.log(context);
-            console.log('context.sha:', context.sha);
+            console.log(`this action was run on branch :: ${context.ref}`);
+            console.log(`SHA :: ${context.sha}`);
+            github.rest.git.createRef({
+              owner: context.actor,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ github.event.inputs.version }}',
+              sha: context.sha
+            })
 
     # - name: Install oc
     #   uses: redhat-actions/openshift-tools-installer@v1
