@@ -54,9 +54,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            console.log(github);
-            console.log(github.event);
-            console.log(github.event.inputs);
+            console.log('hello world');
             # github.rest.git.createRef({
             #   owner: context.repo.owner,
             #   repo: context.repo.repo,
