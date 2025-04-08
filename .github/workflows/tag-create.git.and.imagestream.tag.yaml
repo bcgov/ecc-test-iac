@@ -55,12 +55,7 @@ jobs:
         with:
           script: |
             console.log(context);
-            # github.rest.git.createRef({
-            #   owner: context.repo.owner,
-            #   repo: context.repo.repo,
-            #   ref: 'refs/tags/${{ github.event.inputs.version }}',
-            #   sha: context.sha
-            # })
+            console.log('context.sha:', context.sha);
 
     # - name: Install oc
     #   uses: redhat-actions/openshift-tools-installer@v1
