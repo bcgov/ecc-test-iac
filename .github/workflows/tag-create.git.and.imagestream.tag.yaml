@@ -56,6 +56,7 @@ jobs:
           script: |
             console.log(`this action was run on branch :: ${context.ref}`);
             console.log(`SHA :: ${context.sha}`);
+            console.log('hello world just testing');
             github.rest.git.createRef({
               owner: context.actor,
               repo: context.repo.repo,
