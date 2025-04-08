@@ -56,8 +56,10 @@ jobs:
           script: |
             console.log(`this action was run on branch :: ${context.ref}`);
             console.log(`SHA :: ${context.sha}`);
-            github.rest.git.createRef({
-              owner: context.actor,
+            console.log(`Action run by :: ${context.actor}`);
+
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
               repo: context.repo.repo,
               ref: 'refs/tags/${{ github.event.inputs.version }}',
               sha: context.sha
