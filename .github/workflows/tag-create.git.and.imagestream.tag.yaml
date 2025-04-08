@@ -33,10 +33,6 @@ jobs:
     runs-on: ubuntu-22.04
     environment: dev
 
-    outputs:
-      ROUTE: ${{ steps.deploy-and-expose.outputs.route }}
-      SELECTOR: ${{ steps.deploy-and-expose.outputs.selector }}
-
     steps:
       - name: Check User Input
         run: |
