@@ -40,7 +40,7 @@ jobs:
       - name: Check User Input
         run: |
           regex='^[0-9]+\.[0-9]+\.[0-9]+$'
-          if [[ "${{github.event.inputs.version}}" ~= regex ]]; then
+          if [[ "${{github.event.inputs.version}}" =~ regex ]]; then
             echo user input validated ${{github.event.inputs.version}}
           else
             echo ::error::input must be in x.x.x format your input was ${{github.event.inputs.version}}
