@@ -34,7 +34,7 @@ jobs:
     environment: dev
 
     steps:
-      - name: Check User Input
+      - name: Check User Input and branch
         run: |
           regex='^[0-9]+\.[0-9]+\.[0-9]+$'
           if [[ "${{github.event.inputs.version}}" =~ $regex ]]; then
@@ -43,6 +43,14 @@ jobs:
             echo ::error::input must be in x.x.x format your input was ${{github.event.inputs.version}}
             exit 1
           fi
+
+          if [[ "${{github.ref_name}}" == "master" ]] || [[ "${{github.ref_name}}" == "release/master"* ]]; then
+            echo user input validated ${{github.event.inputs.version}}
+          else
+            echo ::error:: we must run workflow from master or release/master branch your branch was ${{github.event.inputs.version}}
+            exit 1
+          fi
+
       - name: Check out repository
         uses: actions/checkout@v3
 
@@ -61,19 +69,19 @@ jobs:
               sha: context.sha
             })
 
-    # - name: Install oc
-    #   uses: redhat-actions/openshift-tools-installer@v1
-    #   with:
-    #     oc: 4
+      - name: Install oc
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: 4
 
-    #   # https://github.com/redhat-actions/oc-login#readme
-    # - uses: actions/checkout@v3
-    # - name: Tag in OpenShift
-    #   run: |
-    #     set -eux
-    #     # Login to OpenShift and select project
-    #     oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
-    #     oc project ${{ env.OPENSHIFT_NAMESPACE }}
+        # https://github.com/redhat-actions/oc-login#readme
+      - uses: actions/checkout@v3
+      - name: Tag in OpenShift
+        run: |
+          set -eux
+          # Login to OpenShift and select project
+          oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
+          oc project ${{ env.OPENSHIFT_NAMESPACE }}
 
-    #     oc tag ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-frontend-static:latest ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-frontend-static:${{ github.event.inputs.version }}
-    #     oc tag ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-backend-${{ env.BRANCH }}:latest ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-backend-${{ env.BRANCH }}:${{ github.event.inputs.version }}
+          oc tag ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-frontend-static:latest ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-frontend-static:${{ github.event.inputs.version }}
+          oc tag ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-backend-${{ env.BRANCH }}:latest ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-backend-${{ env.BRANCH }}:${{ github.event.inputs.version }}
