@@ -1,0 +1,81 @@
+name: Create Tag
+
+# this action will create a tag from either release-master or master branch on github.
+# it will also tag the image in openshift at the same time. 
+# one this is done, we can run the deploy-to-dev or deploy-efxdev action to bring it into the environment.
+# if we want to run this action again for the same tag number (ex. there are additional changes needed), we will have to delete it on github first before rerunning it. 
+
+env:
+  OPENSHIFT_SERVER: ${{ secrets.OPENSHIFT_SERVER }}
+  OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+  OPENSHIFT_NAMESPACE: ${{ secrets.ECER_NAMESPACE_NO_ENV }}-tools
+
+on:
+  # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version Number in x.x.x format ex. 1.0.0'
+        required: true
+    inputs:
+      version:
+        description: 'Tag from this branch'
+        required: true
+        type: choice
+        options:
+          - master
+          - release/master
+
+jobs:
+  openshift-ci-cd:
+    name: Tag Image
+    # ubuntu-latest can also be used.
+    runs-on: ubuntu-22.04
+    environment: dev
+
+    outputs:
+      ROUTE: ${{ steps.deploy-and-expose.outputs.route }}
+      SELECTOR: ${{ steps.deploy-and-expose.outputs.selector }}
+
+    steps:
+    - name: Check User Input
+        run: |
+          regex='^[0-9]+\.[0-9]+\.[0-9]+$'
+          if [[ "${{github.event.inputs.version}}" ~= regex ]]; then
+            echo user input validated ${{github.event.inputs.version}}
+          else
+            echo ::error::input must be in x.x.x format your input was ${{github.event.inputs.version}}
+            exit 1
+          fi
+    - name: Check out repository
+      uses: actions/checkout@v3
+
+    - name: Create tag
+      uses: actions/github-script@v6
+      with:
+        script: |
+          echo ${{context.sha}}
+          echo ${{context}}
+          # github.rest.git.createRef({
+          #   owner: context.repo.owner,
+          #   repo: context.repo.repo,
+          #   ref: 'refs/tags/${{ github.event.inputs.version }}',
+          #   sha: context.sha
+          # })
+
+    # - name: Install oc
+    #   uses: redhat-actions/openshift-tools-installer@v1
+    #   with:
+    #     oc: 4
+
+    #   # https://github.com/redhat-actions/oc-login#readme
+    # - uses: actions/checkout@v3
+    # - name: Tag in OpenShift
+    #   run: |
+    #     set -eux
+    #     # Login to OpenShift and select project
+    #     oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
+    #     oc project ${{ env.OPENSHIFT_NAMESPACE }}
+        
+    #     oc tag ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-frontend-static:latest ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-frontend-static:${{ github.event.inputs.version }}
+    #     oc tag ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-backend-${{ env.BRANCH }}:latest ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}-backend-${{ env.BRANCH }}:${{ github.event.inputs.version }}
