@@ -52,25 +52,25 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Create tag
-        uses: actions/github-script@v7
-        with:
-          script: |
-            console.log(`this action was run on branch :: ${context.ref}`);
-            console.log(`Github SHA :: ${context.sha}`);
-            console.log(`Action run by :: ${context.actor}`);
+      # - name: Create tag
+      #   uses: actions/github-script@v7
+      #   with:
+      #     script: |
+      #       console.log(`this action was run on branch :: ${context.ref}`);
+      #       console.log(`Github SHA :: ${context.sha}`);
+      #       console.log(`Action run by :: ${context.actor}`);
 
-            await github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ github.event.inputs.version }}',
-              sha: context.sha
-            })
+      #       await github.rest.git.createRef({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         ref: 'refs/tags/${{ github.event.inputs.version }}',
+      #         sha: context.sha
+      #       })
 
-      - name: Install oc
-        uses: redhat-actions/openshift-tools-installer@v1
-        with:
-          oc: 4
+      # - name: Install oc
+      #   uses: redhat-actions/openshift-tools-installer@v1
+      #   with:
+      #     oc: 4
 
       # https://github.com/redhat-actions/oc-login#readme
       - uses: actions/checkout@v3
