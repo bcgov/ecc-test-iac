@@ -41,7 +41,7 @@ jobs:
             echo branch validated ${{github.ref_name}}
             if [[ "${{github.ref_name}}" == "master" ]]; then
               echo "IMAGETAG=master" >> $GITHUB_ENV
-            else if [[ "${{github.ref_name}}" == "release/master" ]]; then
+            elif [[ "${{github.ref_name}}" == "release/master" ]]; then
               echo "IMAGETAG=release-master" >> $GITHUB_ENV
             fi
           else
