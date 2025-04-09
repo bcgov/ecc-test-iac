@@ -6,7 +6,7 @@ name: Create Tag
 # if we want to run this action again for the same tag number (ex. there are additional changes needed), we will have to delete it on github first before rerunning it.
 
 env:
-  OPENSHIFT_SERVER: ${{ secrets.OPENSHIFT_SERVER }}
+  OPENSHIFT_SERVER: ${{ vars.OPENSHIFT_SERVER }}
   OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
   OPENSHIFT_NAMESPACE: ${{ secrets.ECER_NAMESPACE_NO_ENV }}-tools
 
