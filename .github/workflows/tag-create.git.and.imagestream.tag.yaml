@@ -20,14 +20,14 @@ on:
 
 jobs:
   openshift-ci-cd:
-    name: Tag Image
+    name: Tag image
     # ubuntu-latest can also be used.
     runs-on: ubuntu-22.04
     environment: dev
 
     steps:
       # this step will check the user input and branch name. Then set the IMAGETAG variable to be used to tag image in openshift. Ex. release/master => release-master
-      - name: Check User Input and branch
+      - name: Check user input and branch
         run: |
           regex='^[0-9]+\.[0-9]+\.[0-9]+$'
           if [[ "${{github.event.inputs.version}}" =~ $regex ]]; then
