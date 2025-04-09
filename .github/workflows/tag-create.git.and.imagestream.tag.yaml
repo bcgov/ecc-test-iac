@@ -75,7 +75,6 @@ jobs:
       # https://github.com/redhat-actions/oc-login#readme
       - uses: actions/checkout@v3
       - name: Tag in OpenShift
-        needs: check-user-input
         run: |
           echo $IMAGETAG
           # set -eux
