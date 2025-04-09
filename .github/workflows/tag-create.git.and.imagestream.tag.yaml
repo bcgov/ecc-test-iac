@@ -27,6 +27,7 @@ jobs:
     environment: dev
 
     steps:
+      # this step will check the user input and branch name. Then set the IMAGETAG variable to be used in the next steps. release/master => release-master
       - name: Check User Input and branch
         run: |
           regex='^[0-9]+\.[0-9]+\.[0-9]+$'
@@ -38,45 +39,45 @@ jobs:
           fi
 
           if [[ "${{github.ref_name}}" == "master" ]] || [[ "${{github.ref_name}}" == "release/master" ]]; then
-            echo branch validated ${{github.ref_name}}
-            if [[ "${{github.ref_name}}" == "master" ]]; then
-              echo "IMAGETAG=master" >> $GITHUB_ENV
-            elif [[ "${{github.ref_name}}" == "release/master" ]]; then
-              echo "IMAGETAG=release-master" >> $GITHUB_ENV
-            fi
+
+            modified_branch_name=$(echo "${{github.ref_name}}" | tr '/' '-')
+            echo "IMAGETAG=$modified_branch_name" >> $GITHUB_ENV
+
+            echo branch validated ${{github.ref_name}} setting IMAGETAG to $IMAGETAG
           else
             echo ::error:: we must run workflow from master or release/master branch your branch was ${{github.ref_name}}
             exit 1
           fi
 
-      # - name: Check out repository
-      #   uses: actions/checkout@v3
+      - name: Check out repository
+        uses: actions/checkout@v3
 
-      # - name: Create tag
-      #   uses: actions/github-script@v7
-      #   with:
-      #     script: |
-      #       console.log(`this action was run on branch :: ${context.ref}`);
-      #       console.log(`SHA :: ${context.sha}`);
-      #       console.log(`Action run by :: ${context.actor}`);
+      - name: Create tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log(`this action was run on branch :: ${context.ref}`);
+            console.log(`Github SHA :: ${context.sha}`);
+            console.log(`Action run by :: ${context.actor}`);
 
-      #       await github.rest.git.createRef({
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         ref: 'refs/tags/${{ github.event.inputs.version }}',
-      #         sha: context.sha
-      #       })
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ github.event.inputs.version }}',
+              sha: context.sha
+            })
 
-      # - name: Install oc
-      #   uses: redhat-actions/openshift-tools-installer@v1
-      #   with:
-      #     oc: 4
+      - name: Install oc
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: 4
 
       # https://github.com/redhat-actions/oc-login#readme
       - uses: actions/checkout@v3
       - name: Tag in OpenShift
         run: |
-          echo $IMAGETAG
+          echo tagging from image tag $IMAGETAG to ${{github.event.inputs.version}}
+
           # set -eux
           # # Login to OpenShift and select project
           # oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
