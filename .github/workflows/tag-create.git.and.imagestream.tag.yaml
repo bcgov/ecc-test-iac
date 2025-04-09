@@ -82,6 +82,6 @@ jobs:
           oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
           oc project ${{ env.OPENSHIFT_NAMESPACE }}
 
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} registry-portal:${{github.event.inputs.version}} registry-portal:release-${{github.event.inputs.version}}
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} api:${{github.event.inputs.version}} api:release-${{github.event.inputs.version}}
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} e2e-test-data:${{github.event.inputs.version}} e2e-test-data:release-${{github.event.inputs.version}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} registry-portal:"$IMAGETAG" registry-portal:release-${{github.event.inputs.version}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} api:"$IMAGETAG" api:release-${{github.event.inputs.version}}
+          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} e2e-test-data:"$IMAGETAG" e2e-test-data:release-${{github.event.inputs.version}}
