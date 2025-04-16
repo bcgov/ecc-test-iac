@@ -7,10 +7,17 @@ function getAndValidateEnvVars() {
     KC_CLIENT_SECRET: process.env.KC_CLIENT_SECRET,
   };
 
-  for (const value of Object.values(env)) {
-    if (!value) {
-      throw new Error("Environment variables may be missing");
+  let valid = true;
+
+  for (const key of env) {
+    if (!env[key]) {
+      valid = false;
+      console.warn(`${key} variable is not set`);
     }
+  }
+
+  if (!valid) {
+    throw new Error("Environment variables are not set properly");
   }
 
   return env;
