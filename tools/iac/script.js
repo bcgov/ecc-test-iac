@@ -9,7 +9,7 @@ function getAndValidateEnvVars() {
 
   let valid = true;
 
-  for (const key of env) {
+  for (const key in env) {
     if (!env[key]) {
       valid = false;
       console.warn(`${key} variable is not set`);
