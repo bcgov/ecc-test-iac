@@ -23,5 +23,5 @@ jobs:
         with:
           script: |
             const { main } = require('./tools/iac/script.js');
-            await main();
+
       - run: echo "🍏 This job's status is ${{ job.status }}."
