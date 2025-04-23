@@ -8,6 +8,7 @@ module.exports = async ({ _github, context, core, process }) => {
   console.log("environment variables");
   console.log(`REALM ID: ${process.env.REALM_ID}`);
   console.log(`ENVIRONMENT: ${process.env.ENVIRONMENT}`);
+  
 
   try {
     //ensure the json value is valid before proceeding

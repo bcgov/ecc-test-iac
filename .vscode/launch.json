@@ -11,6 +11,14 @@
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}\\tools\\iac\\script.js",
       "envFile": "${workspaceFolder}/tools/iac/.envrc"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Identity Provider Script",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\tools\\iac-identity-providers\\script.js",
+      "envFile": "${workspaceFolder}/tools/iac-identity-providers/.envrc"
     }
   ]
 }

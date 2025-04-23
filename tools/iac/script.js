@@ -139,7 +139,19 @@ export async function main() {
   console.log("obtaining token");
   const token = await fetchToken(KEYCLOAK_URL, KC_CLIENT_ID, KC_CLIENT_SECRET);
 
-  recreateClient(token, KEYCLOAK_ADMIN_URL, "ecer-temp-test-client");
+  const clientSuffix =
+    process.env.KC_ENVIRONMENT === "prod"
+      ? ""
+      : `-${process.env.KC_ENVIRONMENT}`;
+  console.log("clientSuffix", clientSuffix);
+
+  recreateClient(
+    token,
+    KEYCLOAK_ADMIN_URL,
+    `childcare-ecer-api${clientSuffix}`
+  );
+  recreateClient(token, KEYCLOAK_ADMIN_URL, `childcare-ecer${clientSuffix}`);
+  recreateClient(token, KEYCLOAK_ADMIN_URL, `childcare-ecer-ew${clientSuffix}`);
 }
 
 main();
