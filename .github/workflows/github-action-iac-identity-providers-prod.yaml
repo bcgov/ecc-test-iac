@@ -1,0 +1,27 @@
+name: DEV - Deploy Identity Providers to Keycloak Infrastructure As Code
+on:
+  workflow_dispatch:
+jobs:
+  keycloak-infrastructure-as-code:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: check out repository
+        uses: actions/checkout@v4
+      - name: run script
+        uses: actions/github-script@v7
+        env:
+          KC_REALM_ID: "${{ secrets.KC_REALM_ID }}"
+          KC_ENVIRONMENT: "prod"
+          KC_CLIENT_ID: ${{ secrets.KC_CLIENT_ID }}
+          KC_CLIENT_SECRET: ${{ secrets.KC_CLIENT_SECRET }}
+          KC_BASIC_BCEID_CLIENT_ID: ${{ secrets.KC_BASIC_BCEID_CLIENT_ID }}
+          KC_BASIC_BCEID_SECRET: ${{ secrets.KC_BASIC_BCEID_SECRET }}
+          KC_BCSC_CLIENT_ID: ${{ secrets.KC_BCSC_CLIENT_ID }}
+          KC_BCSC_SECRET: ${{ secrets.KC_BCSC_SECRET }}
+
+        with:
+          script: |
+            const { main } = require('./tools/iac-identity-providers/script.js');
+
+      - run: echo "🍏 This job's status is ${{ job.status }}."
