@@ -17,6 +17,7 @@ jobs:
         id: install-cli
         with:
           oc: 4.18.17
+          skip-cache: true
       - name: Print installed OC info
         run: |
           echo "OC installation details:"
