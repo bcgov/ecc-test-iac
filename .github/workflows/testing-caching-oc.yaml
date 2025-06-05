@@ -15,6 +15,4 @@ jobs:
       - name: Install oc
         uses: redhat-actions/openshift-tools-installer@v1
         with:
-          source: "github"
           oc: 4
-          github_pat: ${{ github.token }}
