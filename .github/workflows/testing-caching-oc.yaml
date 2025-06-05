@@ -16,7 +16,7 @@ jobs:
         uses: redhat-actions/openshift-tools-installer@v1
         id: install-cli
         with:
-          oc: 4.18.17
+          oc: 4
           skip_cache: true
       - name: Print installed OC info
         run: |
