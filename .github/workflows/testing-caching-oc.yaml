@@ -17,9 +17,9 @@ jobs:
         id: install-cli
         with:
           oc: 4.18.17
-          skip-cache: true
+          skip_cache: true
       - name: Print installed OC info
         run: |
           echo "OC installation details:"
-          echo "${{steps.install-cli.outputs}}"
+          echo "${{ toJson(steps.install-cli.outputs)}}"
           echo "${{ toJSON(steps.install-cli.outputs.installed) }}"
