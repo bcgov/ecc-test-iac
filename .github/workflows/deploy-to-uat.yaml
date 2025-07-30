@@ -1,4 +1,4 @@
-name: Promote to Test
+name: Promote to UAT
 
 env:
   # 🖊️ EDIT your repository secrets to log into your OpenShift cluster and set up the context.
