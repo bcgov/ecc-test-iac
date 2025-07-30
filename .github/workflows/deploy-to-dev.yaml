@@ -41,7 +41,7 @@ jobs:
             local app_name=$1
             local version=$2
             
-            if [[ "$version" == "master" ]] || [[ "$version" == "release-"* ]] || -n "$version"; then
+            if [[ "$version" == "master" ]] || [[ "$version" == "release-"* ]] || [[ -n "$version" ]]; then
               echo "$app_name input validated: $version"
             else
               echo "::error::$app_name input must be 'master' or 'release-*' or empty. Your input was $version"
