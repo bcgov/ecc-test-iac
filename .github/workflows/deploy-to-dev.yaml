@@ -1,0 +1,165 @@
+name: Promote to Dev
+description: "This action does not depend on the branch."
+
+env:
+  # 🖊️ EDIT your repository secrets to log into your OpenShift cluster and set up the context.
+  # See https://github.com/redhat-actions/oc-login#readme for how to retrieve these values.
+  # To get a permanent token, refer to https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions
+  OPENSHIFT_SERVER: ${{ vars.OPENSHIFT_SERVER }}
+  OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+  OPENSHIFT_NAMESPACE: ${{ secrets.ECER_NAMESPACE_NO_ENV }}-tools
+  APP_ENVIRONMENT_DESTINATION: "dev"
+
+on:
+  workflow_dispatch:
+    inputs:
+      e2e_test_version:
+        description: "E2ETest version (ex. master, release-1.0.0 or release-1.0.1 .etc). Leave empty to skip."
+        default: ""
+        required: false
+      registry_portal_version:
+        description: "Registry portal Version (ex. master, release-1.0.0 or release-1.0.1 .etc). Leave empty to skip."
+        default: ""
+        required: false
+      api_version:
+        description: "Api version (ex. master, release-1.0.0 or release-1.0.1 .etc). Leave empty to skip."
+        default: ""
+        required: false
+
+jobs:
+  openshift-cd:
+    name: Promote Image
+    runs-on: ubuntu-22.04
+    environment: dev
+
+    steps:
+      - name: Check All Inputs
+        run: |
+          isValid="true"
+
+          validate_version_input() {
+            local app_name=$1
+            local version=$2
+            
+            if [[ "$version" == "master" ]] || [[ "$version" == "release-"* ]] || -n "$version"; then
+              echo "$app_name input validated: $version"
+            else
+              echo "::error::$app_name input must be 'master' or 'release-*' or empty. Your input was $version"
+              isValid="false"
+            fi
+          }
+
+          validate_version_input "E2ETest" "${{github.event.inputs.e2e_test_version}}"
+          validate_version_input "RegistryPortal" "${{github.event.inputs.registry_portal_version}}"
+          validate_version_input "Api" "${{github.event.inputs.api_version}}"
+
+          if [[ "$isValid" == "false" ]]; then
+            exit 1
+          fi
+
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Install oc
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: 4
+
+      - name: Tag in OpenShift and Generate Summary
+        run: |
+          set -eux
+          oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
+          oc project ${{ env.OPENSHIFT_NAMESPACE }}
+
+          echo "Promoting imagestreams to ${{env.APP_ENVIRONMENT_DESTINATION}}"
+
+          # Initialize the summary content
+          echo "## API Deployment Summary to ${{env.APP_ENVIRONMENT_DESTINATION}}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # Add an empty line for spacing
+
+          # Function to perform oc tagging and append to summary
+          tag_image() {
+            local image_stream_name=$1
+            local version_input=$2
+            local destination_env=$3
+
+            if [[ -n "$version_input" ]]; then
+              echo "Promoting $image_stream_name:$version_input"
+              # oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true "$image_stream_name":"$version_input" "$image_stream_name":"$destination_env"
+              echo "- ✅ **$image_stream_name**: Deployed version \`$version_input\`" >> $GITHUB_STEP_SUMMARY
+            else
+              # This line will now always be added if input is empty, ensuring all inputs are listed
+              echo "Skipping $image_stream_name as no version was provided"
+              echo "- ❌ **$image_stream_name**: Skipped (no version provided)" >> $GITHUB_STEP_SUMMARY
+            fi
+          }
+
+          # --- Process each API and add to summary ---
+          tag_image "registry-portal" "${{github.event.inputs.registry_portal_version}}" "${{env.APP_ENVIRONMENT_DESTINATION}}"
+          tag_image "api" "${{github.event.inputs.api_version}}" "${{env.APP_ENVIRONMENT_DESTINATION}}"
+
+          # E2ETestData only exists in Dev and is used for automation testing, this will not exist in higher environments.
+          tag_image "e2e-test-data" "${{github.event.inputs.e2e_test_version}}" "${{env.APP_ENVIRONMENT_DESTINATION}}"
+
+# name: Promote to Dev
+
+# env:
+#   # 🖊️ EDIT your repository secrets to log into your OpenShift cluster and set up the context.
+#   # See https://github.com/redhat-actions/oc-login#readme for how to retrieve these values.
+#   # To get a permanent token, refer to https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions
+#   OPENSHIFT_SERVER: ${{ vars.OPENSHIFT_SERVER }}
+#   OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+#   OPENSHIFT_NAMESPACE: ${{ secrets.ECER_NAMESPACE_NO_ENV }}-tools
+#   APP_ENVIRONMENT_DESTINATION: "dev"
+
+# on:
+#   # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
+#   workflow_dispatch:
+#     inputs:
+#       version:
+#         description: "Version ex. master, release-1.0.0 or release-1.0.1 .etc"
+#         default: "master"
+#         required: true
+
+# jobs:
+#   openshift-cd:
+#     name: Promote Image
+#     runs-on: ubuntu-22.04
+#     environment: dev
+
+#     outputs:
+#       ROUTE: ${{ steps.deploy-and-expose.outputs.route }}
+#       SELECTOR: ${{ steps.deploy-and-expose.outputs.selector }}
+
+#     steps:
+#       - name: Check User Input
+#         run: |
+#           echo SOURCE ${{github.event.inputs.version}}
+#           if [[ "${{github.event.inputs.version}}" == "master" ]] || [[ "${{github.event.inputs.version}}" == "release-"* ]]; then
+#             echo user input validated ${{github.event.inputs.version}}
+#           else
+#             echo ::error::input must be 'master' or 'release-*' your input was ${{github.event.inputs.version}}
+#             exit 1
+#           fi
+#       - name: Check out repository
+#         uses: actions/checkout@v4
+#       - name: Install oc
+#         uses: redhat-actions/openshift-tools-installer@v1
+#         with:
+#           oc: 4
+
+#         # https://github.com/redhat-actions/oc-login#readme
+#       - name: Tag in OpenShift
+#         run: |
+#           set -eux
+#           echo VERSION: ${{github.event.inputs.version}}
+#           # Login to OpenShift and select project
+#           oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
+#           oc project ${{ env.OPENSHIFT_NAMESPACE }}
+
+#           echo promoting ${{github.event.inputs.version}} imagestream to ${{env.APP_ENVIRONMENT_DESTINATION}}
+
+#           oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true registry-portal:${{github.event.inputs.version}} registry-portal:${{env.APP_ENVIRONMENT_DESTINATION}}
+#           oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true api:${{github.event.inputs.version}} api:${{env.APP_ENVIRONMENT_DESTINATION}}
+
+#           # E2ETestData only exists in Dev and is used for automation testing, this will not exist in higher environments.
+#           oc tag -n ${{env.OPENSHIFT_NAMESPACE}} --alias=true e2e-test-data:${{github.event.inputs.version}} e2e-test-data:${{env.APP_ENVIRONMENT_DESTINATION}}
