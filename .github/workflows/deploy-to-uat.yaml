@@ -1,0 +1,122 @@
+name: Promote to Test
+
+env:
+  # 🖊️ EDIT your repository secrets to log into your OpenShift cluster and set up the context.
+  # See https://github.com/redhat-actions/oc-login#readme for how to retrieve these values.
+  # To get a permanent token, refer to https://github.com/redhat-actions/oc-login/wiki/Using-a-Service-Account-for-GitHub-Actions
+  OPENSHIFT_SERVER: ${{ vars.OPENSHIFT_SERVER }}
+  OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+  OPENSHIFT_NAMESPACE: ${{ secrets.ECER_NAMESPACE_NO_ENV }}-tools
+  APP_ENVIRONMENT_SOURCE: "test"
+  APP_ENVIRONMENT_DESTINATION: "uat"
+
+on:
+  # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
+  workflow_dispatch:
+    inputs:
+      promote_registry_portal:
+        description: "Promote Registry Portal?"
+        required: false
+        type: boolean
+        default: false
+      promote_api:
+        description: "Promote API?"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  openshift-cd:
+    name: Promote Image
+    runs-on: ubuntu-22.04
+    environment: uat
+
+    outputs:
+      ROUTE: ${{ steps.deploy-and-expose.outputs.route }}
+      SELECTOR: ${{ steps.deploy-and-expose.outputs.selector }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Install oc
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: 4
+
+        # https://github.com/redhat-actions/oc-login#readme
+      - name: Tag in OpenShift
+        run: |
+          set -eux
+
+          # Login to OpenShift and select project
+          oc login --token=${{ env.OPENSHIFT_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }}
+          oc project ${{ env.OPENSHIFT_NAMESPACE }}
+
+          echo "Promoting ${{env.APP_ENVIRONMENT_SOURCE}} imagestream to ${{env.APP_ENVIRONMENT_DESTINATION}}"
+
+          # Initialize summary content
+          SUMMARY_CONTENT="## Promotion Summary\n"
+
+          # Define a reusable function for promotion
+          promote_component() {
+            local component_name="$1"
+            local status_icon=""
+            local status_message=""
+
+            echo "Attempting to promote $component_name..."
+
+            # Check if the imagestream exists before trying to get its SHA
+            if ! oc get is "$component_name" -n ${{env.OPENSHIFT_NAMESPACE}} &>/dev/null; then
+              status_icon="❌"
+              status_message="Imagestream '$component_name' does not exist in namespace ${{env.OPENSHIFT_NAMESPACE}}. Skipping promotion."
+              echo "$status_icon $status_message"
+              echo "$status_icon $component_name: $status_message" >> "$GITHUB_STEP_SUMMARY"
+              return 1 # Indicate failure
+            fi
+
+            local IMAGE_SHA=$(oc get is "$component_name" -o json | jq -r '.spec.tags[] | select(.name == "${{env.APP_ENVIRONMENT_SOURCE}}").from.name')
+
+            if [ -z "$IMAGE_SHA" ]; then
+              status_icon="❌"
+              status_message="Warning: No image SHA found for $component_name in ${APP_ENVIRONMENT_SOURCE} environment. Skipping tag operation."
+              echo "$status_icon $status_message"
+              echo "$status_icon $component_name: $status_message" >> "$GITHUB_STEP_SUMMARY"
+              return 1
+            fi
+
+            echo "$component_name image sha being promoted: $IMAGE_SHA"
+            # oc tag -n ${{env.OPENSHIFT_NAMESPACE}} "$component_name":${{env.APP_ENVIRONMENT_SOURCE}} "$component_name":${{env.APP_ENVIRONMENT_DESTINATION}}
+            echo "Successfully tagged $component_name."
+
+            status_icon="✅"
+            status_message="Promoted successfully \'$IMAGE_SHA\'"
+            echo "$status_icon $component_name: $status_message" >> "$GITHUB_STEP_SUMMARY"
+            return 0 # Indicate success
+          }
+
+          # --- Call the function based on boolean inputs ---
+
+          # Append initial summary header
+          echo "## Promotion Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          if ${{ github.event.inputs.promote_registry_portal }}; then
+            promote_component "registry-portal"
+          else
+            echo "Skipping Registry Portal promotion."
+            echo "❌ Registry Portal: Skipped (not selected)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if ${{ github.event.inputs.promote_api }}; then
+            promote_component "api"
+          else
+            echo "Skipping API promotion."
+            echo "❌ API: Skipped (not selected)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          # To add more components, follow the same pattern:
+          # if ${{ github.event.inputs.promote_another_service }}; then
+          #   promote_component "another-service" || true
+          # else
+          #   echo "❌ Another Service: Skipped (not selected)" >> "$GITHUB_STEP_SUMMARY"
+          # fi
