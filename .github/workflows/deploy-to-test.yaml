@@ -53,12 +53,46 @@ jobs:
 
           echo promoting ${{env.APP_ENVIRONMENT_SOURCE}} imagestream to ${{env.APP_ENVIRONMENT_DESTINATION}}
 
-          #grabs the image sha for our input environments using jq
-          API_IMAGE_SHA=$(oc get is api -o json | jq -r '.spec.tags[] | select(.name == "${{env.APP_ENVIRONMENT_SOURCE}}").from.name')
-          REGISTRY_PORTAL_IMAGE_SHA=$(oc get is registry-portal -o json | jq -r '.spec.tags[] | select(.name == "${{env.APP_ENVIRONMENT_SOURCE}}").from.name')
+          # Define a reusable function for promotion
+          promote_component() {
+            local component_name="$1"
+            echo "Attempting to promote $component_name..."
 
-          echo registry-portal image sha being promoted: $REGISTRY_PORTAL_IMAGE_SHA
-          echo api image sha being promoted: $API_IMAGE_SHA
+            # Check if the imagestream exists before trying to get its SHA
+            if ! oc get is "$component_name" -n ${{env.OPENSHIFT_NAMESPACE}} &>/dev/null; then
+              echo "Imagestream '$component_name' does not exist in namespace ${{env.OPENSHIFT_NAMESPACE}}. Skipping promotion for this component."
+              return 1 # Indicate failure to promote this component
+            fi
 
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} registry-portal:${{env.APP_ENVIRONMENT_SOURCE}} registry-portal:${{env.APP_ENVIRONMENT_DESTINATION}}
-          oc tag -n ${{env.OPENSHIFT_NAMESPACE}} api:${{env.APP_ENVIRONMENT_SOURCE}} api:${{env.APP_ENVIRONMENT_DESTINATION}}
+            local IMAGE_SHA=$(oc get is "$component_name" -o json | jq -r '.spec.tags[] | select(.name == "${{env.APP_ENVIRONMENT_SOURCE}}").from.name')
+
+            if [ -z "$IMAGE_SHA" ]; then
+              echo "Warning: No image SHA found for $component_name in ${APP_ENVIRONMENT_SOURCE} environment. Skipping tag operation."
+              return 1
+            fi
+
+            echo "$component_name image sha being promoted: $IMAGE_SHA"
+            # oc tag -n ${{env.OPENSHIFT_NAMESPACE}} "$component_name":${{env.APP_ENVIRONMENT_SOURCE}} "$component_name":${{env.APP_ENVIRONMENT_DESTINATION}}
+          }
+
+          if ${{ github.event.inputs.promote_registry_portal }}; then
+            promote_component "registry-portal"
+          else
+            echo "Skipping Registry Portal promotion."
+          fi
+
+          if ${{ github.event.inputs.promote_api }}; then
+            promote_component "api"
+          else
+            echo "Skipping API promotion."
+          fi
+
+          # #grabs the image sha for our input environments using jq
+          # API_IMAGE_SHA=$(oc get is api -o json | jq -r '.spec.tags[] | select(.name == "${{env.APP_ENVIRONMENT_SOURCE}}").from.name')
+          # REGISTRY_PORTAL_IMAGE_SHA=$(oc get is registry-portal -o json | jq -r '.spec.tags[] | select(.name == "${{env.APP_ENVIRONMENT_SOURCE}}").from.name')
+
+          # echo registry-portal image sha being promoted: $REGISTRY_PORTAL_IMAGE_SHA
+          # echo api image sha being promoted: $API_IMAGE_SHA
+
+          # oc tag -n ${{env.OPENSHIFT_NAMESPACE}} registry-portal:${{env.APP_ENVIRONMENT_SOURCE}} registry-portal:${{env.APP_ENVIRONMENT_DESTINATION}}
+          # oc tag -n ${{env.OPENSHIFT_NAMESPACE}} api:${{env.APP_ENVIRONMENT_SOURCE}} api:${{env.APP_ENVIRONMENT_DESTINATION}}
