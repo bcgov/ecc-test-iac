@@ -1,4 +1,5 @@
 name: Create Tag
+description: running this from a specific branch is important
 
 # this action will create a tag from either release/master or master branch on github.
 # it will also tag the image in openshift at the same time.
