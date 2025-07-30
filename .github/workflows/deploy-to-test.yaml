@@ -89,7 +89,7 @@ jobs:
             echo "Successfully tagged $component_name."
 
             status_icon="✅"
-            status_message="Promoted successfully."
+            status_message="Promoted successfully \'$IMAGE_SHA\'"
             echo "$status_icon $component_name: $status_message" >> "$GITHUB_STEP_SUMMARY"
             return 0 # Indicate success
           }
