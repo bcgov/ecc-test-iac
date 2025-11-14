@@ -84,5 +84,8 @@ export KC_BCSC_CLIENT_ID=<<STRING>>
 export KC_BCSC_SECRET=<<STRING>>
 ```
 
-![alt text](image.png)
+![alt text](./images/play-debug.png)
 Click the play with bug icon and launch the script with the green play button. You will be able to set breakpoints in your code and change environment variables.
+
+![alt text](./images/export-clients-keycloak.png)
+To easily add additional clients, you can create the template first in keycloak and then export it directly to the mappers array

@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Program",
+      "name": "Launch ECER clients Program",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}\\tools\\iac\\script.js",
       "envFile": "${workspaceFolder}/tools/iac/.envrc"

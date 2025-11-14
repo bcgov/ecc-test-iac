@@ -54,9 +54,6 @@ jobs:
 
           echo "Promoting ${{env.APP_ENVIRONMENT_SOURCE}} imagestream to ${{env.APP_ENVIRONMENT_DESTINATION}}"
 
-          # Initialize summary content
-          SUMMARY_CONTENT="## Promotion Summary\n"
-
           # Define a reusable function for promotion
           promote_component() {
             local component_name="$1"

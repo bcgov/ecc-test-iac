@@ -145,13 +145,26 @@ export async function main() {
       : `-${process.env.KC_ENVIRONMENT}`;
   console.log("clientSuffix", clientSuffix);
 
-  recreateClient(
+  await recreateClient(
     token,
     KEYCLOAK_ADMIN_URL,
     `childcare-ecer-api${clientSuffix}`
   );
-  recreateClient(token, KEYCLOAK_ADMIN_URL, `childcare-ecer${clientSuffix}`);
-  recreateClient(token, KEYCLOAK_ADMIN_URL, `childcare-ecer-ew${clientSuffix}`);
+  await recreateClient(
+    token,
+    KEYCLOAK_ADMIN_URL,
+    `childcare-ecer${clientSuffix}`
+  );
+  await recreateClient(
+    token,
+    KEYCLOAK_ADMIN_URL,
+    `childcare-ecer-ew${clientSuffix}`
+  );
+  await recreateClient(
+    token,
+    KEYCLOAK_ADMIN_URL,
+    `childcare-ecer-psp${clientSuffix}`
+  );
 }
 
 main();
